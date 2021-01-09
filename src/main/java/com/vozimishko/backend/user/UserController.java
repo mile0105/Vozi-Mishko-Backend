@@ -6,6 +6,7 @@ import com.vozimishko.backend.user.service.UserService;
 import com.vozimishko.backend.util.models.EmptyResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,5 +30,11 @@ public class UserController {
   public ResponseEntity<CustomJwtToken> login(@RequestBody UserApi userApi) {
     CustomJwtToken jwtToken = userService.login(userApi.getEmail(), userApi.getPassword());
     return ResponseEntity.ok(jwtToken);
+  }
+
+  @GetMapping("/me")
+  public ResponseEntity<UserApi> getMyData() {
+    UserApi loggedInUser = userService.getLoggedInUserData();
+    return ResponseEntity.ok(loggedInUser);
   }
 }

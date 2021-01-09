@@ -1,6 +1,8 @@
 package com.vozimishko.backend.user.service;
 
 import com.vozimishko.backend.error.exceptions.BadRequestException;
+import com.vozimishko.backend.error.exceptions.NotFoundException;
+import com.vozimishko.backend.security.PrincipalService;
 import com.vozimishko.backend.security.jwt.CustomJwtToken;
 import com.vozimishko.backend.security.jwt.JwtUtils;
 import com.vozimishko.backend.user.model.User;
@@ -21,6 +23,7 @@ public class UserService {
   private final UserRepository userRepository;
   private final UserMapper userMapper;
   private final AuthenticationManager authenticationManager;
+  private final PrincipalService principalService;
   private final JwtUtils jwtUtils;
 
   public void register(UserApi userApi) {
@@ -43,6 +46,14 @@ public class UserService {
       .accessToken(accessToken)
       .refreshToken(refreshToken)
       .build();
+  }
+
+  public UserApi getLoggedInUserData() {
+    Long loggedInUserId = principalService.getLoggedInUserId();
+    User loggedInUser = userRepository.findById(loggedInUserId).orElseThrow(() -> {
+      throw new NotFoundException("User not found, something went wrong");
+    });
+    return userMapper.transformFromDbModel(loggedInUser);
   }
 
   private void checkIfUserWithEmailExists(String email, String phoneNumber) {

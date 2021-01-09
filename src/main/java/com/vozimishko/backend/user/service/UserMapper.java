@@ -24,4 +24,13 @@ public class UserMapper {
       .role(Role.NORMAL_USER.getName())
       .build();
   }
+
+  public UserApi transformFromDbModel(User user) {
+    return UserApi.builder()
+      .email(user.getEmail())
+      .phoneNumber(user.getPhoneNumber())
+      .firstName(user.getFirstName())
+      .lastName(user.getLastName())
+      .build();
+  }
 }
