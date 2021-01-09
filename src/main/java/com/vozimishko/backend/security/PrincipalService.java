@@ -21,9 +21,7 @@ public class PrincipalService {
 
   public Long getLoggedInUserId() {
 
-
     String authorizationHeader = getCurrentHttpRequest().getHeader(AUTHORIZATION_HEADER);
-
     String token = authorizationHeader.replace(ACCESS_TOKEN_PREFIX, "");
 
     return jwtUtils.getUserIdFromToken(token);

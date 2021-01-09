@@ -50,10 +50,10 @@ public class UserService {
 
   public UserApi getLoggedInUserData() {
     Long loggedInUserId = principalService.getLoggedInUserId();
-    User loggedInUser = userRepository.findById(loggedInUserId).orElseThrow(() -> {
-      throw new NotFoundException("User not found, something went wrong");
-    });
-    return userMapper.transformFromDbModel(loggedInUser);
+
+    return userRepository.findById(loggedInUserId)
+      .map(userMapper::transformFromDbModel)
+      .orElseThrow(() -> new NotFoundException("User not found, something went wrong"));
   }
 
   private void checkIfUserWithEmailExists(String email, String phoneNumber) {
