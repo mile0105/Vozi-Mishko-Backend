@@ -52,6 +52,27 @@ class UserMapperTest {
     assertThat(result.getPhoneNumber()).isEqualTo(testUserApi.getPhoneNumber());
     assertThat(result.getPassword()).isEqualTo(encodedPassword);
     assertThat(result.getRole()).isEqualTo(Role.NORMAL_USER.getName());
+  }
+
+  @Test
+  void shouldTransformToApiModel() {
+
+    User user = User.builder()
+      .email("email")
+      .phoneNumber("123-456")
+      .firstName("Vozi")
+      .lastName("Mishko")
+      .password("{noop}secretPassword123")
+      .role(Role.NORMAL_USER.getName())
+      .build();
+
+    UserApi result = userMapper.transformFromDbModel(user);
+
+    assertThat(result.getEmail()).isEqualTo(user.getEmail());
+    assertThat(result.getPhoneNumber()).isEqualTo(user.getPhoneNumber());
+    assertThat(result.getFirstName()).isEqualTo(user.getFirstName());
+    assertThat(result.getLastName()).isEqualTo(user.getLastName());
+    assertThat(result.getPassword()).isNull();
 
   }
 }

@@ -1,6 +1,7 @@
 package com.vozimishko.backend.user.service;
 
 import com.vozimishko.backend.error.exceptions.BadRequestException;
+import com.vozimishko.backend.security.PrincipalService;
 import com.vozimishko.backend.security.jwt.CustomJwtToken;
 import com.vozimishko.backend.security.jwt.JwtUtils;
 import com.vozimishko.backend.user.model.User;
@@ -31,12 +32,13 @@ class UserServiceTest {
   @Mock
   private AuthenticationManager authenticationManager;
   @Mock
+  private PrincipalService principalService;
+  @Mock
   private JwtUtils jwtUtils;
-
   @Mock
   private Authentication authentication;
-
   private UserService userService;
+
   private UserApi testUserApi;
   private User testUser;
   private String testAccessToken;
@@ -45,7 +47,7 @@ class UserServiceTest {
   @BeforeEach
   void setUp() {
 
-    userService = new UserService(userRepository, userMapper, authenticationManager, jwtUtils);
+    userService = new UserService(userRepository, userMapper, authenticationManager, principalService, jwtUtils);
 
     testUserApi = UserApi.builder().email("email").phoneNumber("123-456").build();
     testUser = User.builder().id(1L).email("email").phoneNumber("123-456").build();
@@ -100,5 +102,17 @@ class UserServiceTest {
 
     assertThat(customJwtToken.getAccessToken()).isEqualTo(testAccessToken);
     assertThat(customJwtToken.getRefreshToken()).isEqualTo(testRefreshToken);
+  }
+
+  @Test
+  void shouldGetLoggedInUserData() {
+    Long userId = testUser.getId();
+    when(principalService.getLoggedInUserId()).thenReturn(userId);
+    when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
+    when(userMapper.transformFromDbModel(testUser)).thenReturn(testUserApi);
+
+    UserApi result = userService.getLoggedInUserData();
+
+    assertThat(result).isEqualTo(testUserApi);
   }
 }

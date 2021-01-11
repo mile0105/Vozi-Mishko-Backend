@@ -53,7 +53,7 @@ public class UserService {
 
     return userRepository.findById(loggedInUserId)
       .map(userMapper::transformFromDbModel)
-      .orElseThrow(() -> new NotFoundException("User not found, something went wrong"));
+      .orElseThrow(() -> new IllegalStateException("Something went wrong"));
   }
 
   private void checkIfUserWithEmailExists(String email, String phoneNumber) {
