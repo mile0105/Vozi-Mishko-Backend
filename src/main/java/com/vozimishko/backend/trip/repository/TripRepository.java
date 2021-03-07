@@ -16,4 +16,7 @@ public interface TripRepository extends CrudRepository<Trip, Long> {
 
   @Query("select * from trips where driverId = :driverId")
   public List<Trip> getTripsByDriverId(@Param("driverId") Long driverId);
+
+  @Query("select * from trips where :passengerId = ANY(passenger_ids)")
+  public List<Trip> getTripsByPassengerId(@Param("passengerId") Long passengerId);
 }

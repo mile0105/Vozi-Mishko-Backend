@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -56,8 +57,14 @@ public class TripController {
   }
 
   @GetMapping("/my/driver")
-  public ResponseEntity<List<Trip>> getTripsDriverView() {
+  public ResponseEntity<List<Trip>> getTripsWhereIDrive() {
     List<Trip> trips = tripService.getTripsWhereIDrive();
+    return ResponseEntity.ok(trips);
+  }
+
+  @GetMapping("/my/customer")
+  public ResponseEntity<List<Trip>> getTripsWhereIAmSubscribed() {
+    List<Trip> trips = tripService.getTripsWhereIAmSubscribed();
     return ResponseEntity.ok(trips);
   }
 

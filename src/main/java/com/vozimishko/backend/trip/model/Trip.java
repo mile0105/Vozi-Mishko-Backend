@@ -25,5 +25,5 @@ public class Trip {
   @Column("car_id")
   private Long carId;
   @Column("passenger_ids")
-  private List<Long> passengerIds;
+  private List<Integer> passengerIds;
 }

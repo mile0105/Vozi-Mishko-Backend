@@ -61,8 +61,8 @@ public class TripService {
     validateCustomerIdDoesntExist(trip, loggedInUserId);
     validateTripSeats(trip);
 
-    List<Long> updatedPassengerIds = new ArrayList<>(trip.getPassengerIds());
-    updatedPassengerIds.add(loggedInUserId);
+    List<Integer> updatedPassengerIds = new ArrayList<>(trip.getPassengerIds());
+    updatedPassengerIds.add(loggedInUserId.intValue());
     Trip newTrip = trip.toBuilder().passengerIds(updatedPassengerIds).build();
 
     return tripRepository.save(newTrip);
@@ -79,8 +79,8 @@ public class TripService {
     validateDriverDoesntExist(trip, loggedInUserId);
     validateCustomerIdExists(trip, loggedInUserId);
 
-    List<Long> updatedPassengerIds = new ArrayList<>(trip.getPassengerIds());
-    updatedPassengerIds.remove(loggedInUserId);
+    List<Integer> updatedPassengerIds = new ArrayList<>(trip.getPassengerIds());
+    updatedPassengerIds.remove(loggedInUserId.intValue());
     Trip newTrip = trip.toBuilder().passengerIds(updatedPassengerIds).build();
 
     return tripRepository.save(newTrip);
@@ -92,12 +92,18 @@ public class TripService {
     return tripRepository.getTripsByDriverId(loggedInUserId);
   }
 
+  public List<Trip> getTripsWhereIAmSubscribed() {
+    Long loggedInUserId = principalService.getLoggedInUserId();
+
+    return tripRepository.getTripsByPassengerId(loggedInUserId);
+  }
+
   public List<UserDetails> getMyPassengerDetails(Long tripId) {
     Long loggedInUserId = principalService.getLoggedInUserId();
     Trip trip = findByIdOrThrow(tripId);
     validateUserIsDriver(trip, loggedInUserId);
 
-    return userService.getUserDetails(trip.getPassengerIds());
+    return userService.getUserDetails(trip.getPassengerIds().stream().map(Integer::longValue).collect(Collectors.toList()));
   }
 
   public UserDetails getDriverDetails(Long tripId) {
