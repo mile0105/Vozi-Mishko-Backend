@@ -42,9 +42,15 @@ public class TripController {
     return ResponseEntity.ok(trip);
   }
 
-  @PatchMapping("/{id}")
+  @PatchMapping("/{id}/subscribe")
   public ResponseEntity<Trip> subscribeToTrip(@PathVariable(name = "id") Long tripId) {
     Trip trip = tripService.subscribeToTrip(tripId);
+    return ResponseEntity.ok(trip);
+  }
+
+  @PatchMapping("/{id}/unsubscribe")
+  public ResponseEntity<Trip> unsubscribeFromTrip(@PathVariable(name = "id") Long tripId) {
+    Trip trip = tripService.unsubscribeFromTrip(tripId);
     return ResponseEntity.ok(trip);
   }
 
