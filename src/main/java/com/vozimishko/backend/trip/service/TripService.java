@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -97,6 +98,20 @@ public class TripService {
     validateUserIsDriver(trip, loggedInUserId);
 
     return userService.getUserDetails(trip.getPassengerIds());
+  }
+
+  public UserDetails getDriverDetails(Long tripId) {
+    Long loggedInUserId = principalService.getLoggedInUserId();
+    Trip trip = findByIdOrThrow(tripId);
+    validateCustomerIdExists(trip, loggedInUserId);
+
+    List<UserDetails> userDetails = userService.getUserDetails(Collections.singletonList(trip.getDriverId()));
+
+    if(userDetails.size() != 1) {
+      throw new BadRequestException("Something went wrong, if this problem persists, please contact us");
+    }
+
+    return userDetails.get(0);
   }
 
 

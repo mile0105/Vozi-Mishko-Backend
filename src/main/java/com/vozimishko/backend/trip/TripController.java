@@ -67,4 +67,10 @@ public class TripController {
     return ResponseEntity.ok(myCustomers);
   }
 
+  @GetMapping("/{id}/driver/details")
+  public ResponseEntity<UserDetails> getDriverDetails(@PathVariable(name = "id") Long tripId) {
+    UserDetails driverDetails = tripService.getDriverDetails(tripId);
+    return ResponseEntity.ok(driverDetails);
+  }
+
 }
