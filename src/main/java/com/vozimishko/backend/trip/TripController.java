@@ -54,4 +54,14 @@ public class TripController {
     return ResponseEntity.ok(trip);
   }
 
+  @GetMapping("/my/driver")
+  public ResponseEntity<List<Trip>> getTripsDriverView() {
+    return ResponseEntity.ok(null);
+  }
+
+  @GetMapping("/{id}/details")
+  public ResponseEntity<Trip> getTripDetailsDriverView() {
+    return ResponseEntity.ok(null);
+  }
+
 }

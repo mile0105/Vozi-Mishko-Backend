@@ -54,6 +54,7 @@ public class TripService {
     Trip trip = findByIdOrThrow(tripId);
     validateDriver(trip, loggedInUserId);
     validateCustomerIdDoesntExist(trip, loggedInUserId);
+    validateTripSeats(trip);
 
     List<Long> updatedPassengerIds = new ArrayList<>(trip.getPassengerIds());
     updatedPassengerIds.add(loggedInUserId);
