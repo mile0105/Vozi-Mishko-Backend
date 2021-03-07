@@ -3,6 +3,7 @@ package com.vozimishko.backend.trip;
 import com.vozimishko.backend.trip.model.Trip;
 import com.vozimishko.backend.trip.model.TripApi;
 import com.vozimishko.backend.trip.service.TripService;
+import com.vozimishko.backend.user.model.UserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,12 +57,14 @@ public class TripController {
 
   @GetMapping("/my/driver")
   public ResponseEntity<List<Trip>> getTripsDriverView() {
-    return ResponseEntity.ok(null);
+    List<Trip> trips = tripService.getTripsWhereIDrive();
+    return ResponseEntity.ok(trips);
   }
 
   @GetMapping("/{id}/details")
-  public ResponseEntity<Trip> getTripDetailsDriverView() {
-    return ResponseEntity.ok(null);
+  public ResponseEntity<List<UserDetails>> getTripDetailsDriverView(@PathVariable(name = "id") Long tripId) {
+    List<UserDetails> myCustomers = tripService.getMyPassengerDetails(tripId);
+    return ResponseEntity.ok(myCustomers);
   }
 
 }

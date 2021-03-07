@@ -13,4 +13,7 @@ public interface TripRepository extends CrudRepository<Trip, Long> {
 
   @Query("select * from trips where start = :start and \"END\" = :end")
   public List<Trip> getTripsByOriginAndDestination(@Param("start") String start, @Param("end") String end);
+
+  @Query("select * from trips where driverId = :driverId")
+  public List<Trip> getTripsByDriverId(@Param("driverId") Long driverId);
 }

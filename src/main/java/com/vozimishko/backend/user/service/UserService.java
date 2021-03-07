@@ -7,6 +7,7 @@ import com.vozimishko.backend.security.jwt.CustomJwtToken;
 import com.vozimishko.backend.security.jwt.JwtUtils;
 import com.vozimishko.backend.user.model.User;
 import com.vozimishko.backend.user.model.UserApi;
+import com.vozimishko.backend.user.model.UserDetails;
 import com.vozimishko.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,7 +15,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
@@ -54,6 +58,13 @@ public class UserService {
     return userRepository.findById(loggedInUserId)
       .map(userMapper::transformFromDbModel)
       .orElseThrow(() -> new IllegalStateException("Something went wrong"));
+  }
+
+  public List<UserDetails> getUserDetails(List<Long> userIds) {
+    Iterable<User> users = userRepository.findAllById(userIds);
+    return StreamSupport.stream(users.spliterator(), false)
+      .map(userMapper::transformToUserDetails)
+      .collect(Collectors.toList());
   }
 
   private void checkIfUserWithEmailExists(String email, String phoneNumber) {

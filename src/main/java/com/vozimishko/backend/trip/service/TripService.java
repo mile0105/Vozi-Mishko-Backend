@@ -4,10 +4,13 @@ import com.vozimishko.backend.car.model.Car;
 import com.vozimishko.backend.car.service.CarService;
 import com.vozimishko.backend.error.exceptions.BadRequestException;
 import com.vozimishko.backend.error.exceptions.NotFoundException;
+import com.vozimishko.backend.error.exceptions.UnauthorizedException;
 import com.vozimishko.backend.security.PrincipalService;
 import com.vozimishko.backend.trip.model.Trip;
 import com.vozimishko.backend.trip.model.TripApi;
 import com.vozimishko.backend.trip.repository.TripRepository;
+import com.vozimishko.backend.user.model.UserDetails;
+import com.vozimishko.backend.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -25,6 +28,7 @@ public class TripService {
   private final TripMapper mapper;
   private final PrincipalService principalService;
   private final CarService carService;
+  private final UserService userService;
 
   public Trip addTrip(TripApi tripApi) {
     Long loggedInUserId = principalService.getLoggedInUserId();
@@ -52,7 +56,7 @@ public class TripService {
 
     Long loggedInUserId = principalService.getLoggedInUserId();
     Trip trip = findByIdOrThrow(tripId);
-    validateDriver(trip, loggedInUserId);
+    validateDriverDoesntExist(trip, loggedInUserId);
     validateCustomerIdDoesntExist(trip, loggedInUserId);
     validateTripSeats(trip);
 
@@ -71,7 +75,7 @@ public class TripService {
 
     Long loggedInUserId = principalService.getLoggedInUserId();
     Trip trip = findByIdOrThrow(tripId);
-    validateDriver(trip, loggedInUserId);
+    validateDriverDoesntExist(trip, loggedInUserId);
     validateCustomerIdExists(trip, loggedInUserId);
 
     List<Long> updatedPassengerIds = new ArrayList<>(trip.getPassengerIds());
@@ -79,6 +83,20 @@ public class TripService {
     Trip newTrip = trip.toBuilder().passengerIds(updatedPassengerIds).build();
 
     return tripRepository.save(newTrip);
+  }
+
+  public List<Trip> getTripsWhereIDrive() {
+    Long loggedInUserId = principalService.getLoggedInUserId();
+
+    return tripRepository.getTripsByDriverId(loggedInUserId);
+  }
+
+  public List<UserDetails> getMyPassengerDetails(Long tripId) {
+    Long loggedInUserId = principalService.getLoggedInUserId();
+    Trip trip = findByIdOrThrow(tripId);
+    validateUserIsDriver(trip, loggedInUserId);
+
+    return userService.getUserDetails(trip.getPassengerIds());
   }
 
 
@@ -89,7 +107,7 @@ public class TripService {
     }
   }
 
-  private void validateDriver(Trip trip, Long loggedInUser) {
+  private void validateDriverDoesntExist(Trip trip, Long loggedInUser) {
     if (trip.getDriverId().equals(loggedInUser)) {
       throw new BadRequestException("Driver cannot further subscribe/unsubscribe from trip");
     }
@@ -103,7 +121,13 @@ public class TripService {
 
   private void validateCustomerIdExists(Trip trip, Long loggedInUser) {
     if (!trip.getPassengerIds().contains(loggedInUser)) {
-      throw new BadRequestException("Trip already contains customer");
+      throw new BadRequestException("Trip does not contain customer");
+    }
+  }
+
+  private void validateUserIsDriver(Trip trip, Long loggedInUser) {
+    if (!trip.getDriverId().equals(loggedInUser)) {
+      throw new UnauthorizedException("You do not have permissions to view this");
     }
   }
 
