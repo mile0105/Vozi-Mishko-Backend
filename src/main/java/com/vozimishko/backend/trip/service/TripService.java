@@ -1,6 +1,7 @@
 package com.vozimishko.backend.trip.service;
 
 import com.vozimishko.backend.error.exceptions.BadRequestException;
+import com.vozimishko.backend.error.exceptions.NotFoundException;
 import com.vozimishko.backend.security.PrincipalService;
 import com.vozimishko.backend.trip.model.Trip;
 import com.vozimishko.backend.trip.model.TripApi;
@@ -60,9 +61,8 @@ public class TripService {
     return tripRepository.save(newTrip);
   }
 
-  private Trip findByIdOrThrow(Long tripId) {
-
-    return tripRepository.findById(tripId).orElseThrow(() -> new BadRequestException("Trip not found"));
+  public Trip findByIdOrThrow(Long tripId) {
+    return tripRepository.findById(tripId).orElseThrow(() -> new NotFoundException("Trip not found"));
   }
 
 }

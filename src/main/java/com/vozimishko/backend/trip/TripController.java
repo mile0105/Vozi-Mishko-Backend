@@ -36,6 +36,12 @@ public class TripController {
     return ResponseEntity.ok(trips);
   }
 
+  @GetMapping("/{id}")
+  public ResponseEntity<Trip> getTripById(@PathVariable(name = "id") Long tripId) {
+    Trip trip = tripService.findByIdOrThrow(tripId);
+    return ResponseEntity.ok(trip);
+  }
+
   @PatchMapping("/{id}")
   public ResponseEntity<Trip> subscribeToTrip(@PathVariable(name = "id") Long tripId) {
     Trip trip = tripService.subscribeToTrip(tripId);

@@ -3,6 +3,7 @@ package com.vozimishko.backend.car.service;
 import com.vozimishko.backend.car.model.Car;
 import com.vozimishko.backend.car.model.CarApi;
 import com.vozimishko.backend.car.repository.CarRepository;
+import com.vozimishko.backend.error.exceptions.NotFoundException;
 import com.vozimishko.backend.security.PrincipalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,4 +28,7 @@ public class CarService {
     return carRepository.getCarsFromUser(loggedInUserId);
   }
 
+  public Car findByIdOrThrow(Long carId) {
+    return carRepository.findById(carId).orElseThrow(() -> new NotFoundException("Car not found"));
+  }
 }
