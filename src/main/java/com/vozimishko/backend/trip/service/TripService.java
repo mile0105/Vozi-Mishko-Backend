@@ -7,9 +7,12 @@ import com.vozimishko.backend.trip.model.TripApi;
 import com.vozimishko.backend.trip.repository.TripRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
@@ -29,8 +32,16 @@ public class TripService {
 
   public List<Trip> fetchTrips(String start, String end) {
 
-    List<Trip> trips = tripRepository.getTripsByOriginAndDestination(start, end);
-    return trips;
+    if (StringUtils.hasText(start) && StringUtils.hasText(end)) {
+      return tripRepository.getTripsByOriginAndDestination(start.toUpperCase(), end.toUpperCase());
+    }
+
+    if(!StringUtils.hasText(start) && !StringUtils.hasText(end)) {
+      return StreamSupport.stream(tripRepository.findAll().spliterator(), false)
+        .collect(Collectors.toList());
+    }
+
+    throw new BadRequestException("");
   }
 
   public Trip subscribeToTrip(Long tripId) {

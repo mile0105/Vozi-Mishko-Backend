@@ -30,8 +30,8 @@ public class TripController {
   }
 
   @GetMapping
-  public ResponseEntity<List<Trip>> getTrips(@RequestParam(name = "start") String start,
-                                             @RequestParam(name = "end") String end) {
+  public ResponseEntity<List<Trip>> getTrips(@RequestParam(name = "start", required = false) String start,
+                                             @RequestParam(name = "end", required = false) String end) {
     List<Trip> trips = tripService.fetchTrips(start, end);
     return ResponseEntity.ok(trips);
   }

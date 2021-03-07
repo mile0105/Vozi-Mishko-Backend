@@ -17,8 +17,8 @@ public class TripMapper {
       .parse(tripApi.getTimeOfDeparture(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
     return Trip.builder()
-      .start(tripApi.getStart())
-      .end(tripApi.getEnd())
+      .start(tripApi.getStart().toUpperCase())
+      .end(tripApi.getEnd().toUpperCase())
       .timeOfDeparture(localDateTime)
       .carId(tripApi.getCarId())
       .driverId(driverId)
