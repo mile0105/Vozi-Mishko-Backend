@@ -59,6 +59,7 @@ class UserMapperTest {
 
     User user = User.builder()
       .email("email")
+      .id(1L)
       .phoneNumber("123-456")
       .firstName("Vozi")
       .lastName("Mishko")
@@ -73,6 +74,6 @@ class UserMapperTest {
     assertThat(result.getFirstName()).isEqualTo(user.getFirstName());
     assertThat(result.getLastName()).isEqualTo(user.getLastName());
     assertThat(result.getPassword()).isNull();
-
+    assertThat(result.getId()).isEqualTo(user.getId());
   }
 }

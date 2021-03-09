@@ -32,6 +32,7 @@ public class UserMapper {
       .phoneNumber(user.getPhoneNumber())
       .firstName(user.getFirstName())
       .lastName(user.getLastName())
+      .id(user.getId())
       .build();
   }
 

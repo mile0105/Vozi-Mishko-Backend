@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserApi {
+  private Long id;
   private String email;
   private String password;
   private String phoneNumber;
