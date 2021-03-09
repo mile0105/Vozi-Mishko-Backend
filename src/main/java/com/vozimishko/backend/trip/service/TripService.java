@@ -80,7 +80,7 @@ public class TripService {
     validateCustomerIdExists(trip, loggedInUserId);
 
     List<Integer> updatedPassengerIds = new ArrayList<>(trip.getPassengerIds());
-    updatedPassengerIds.remove(loggedInUserId.intValue());
+    updatedPassengerIds.remove((Integer) loggedInUserId.intValue());
     Trip newTrip = trip.toBuilder().passengerIds(updatedPassengerIds).build();
 
     return tripRepository.save(newTrip);
@@ -113,7 +113,7 @@ public class TripService {
 
     List<UserDetails> userDetails = userService.getUserDetails(Collections.singletonList(trip.getDriverId()));
 
-    if(userDetails.size() != 1) {
+    if (userDetails.size() != 1) {
       throw new BadRequestException("Something went wrong, if this problem persists, please contact us");
     }
 
@@ -135,13 +135,13 @@ public class TripService {
   }
 
   private void validateCustomerIdDoesntExist(Trip trip, Long loggedInUser) {
-    if (trip.getPassengerIds().contains(loggedInUser)) {
+    if (trip.getPassengerIds().contains(loggedInUser.intValue())) {
       throw new BadRequestException("Trip already contains customer");
     }
   }
 
   private void validateCustomerIdExists(Trip trip, Long loggedInUser) {
-    if (!trip.getPassengerIds().contains(loggedInUser)) {
+    if (!trip.getPassengerIds().contains(loggedInUser.intValue())) {
       throw new BadRequestException("Trip does not contain customer");
     }
   }

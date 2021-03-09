@@ -1,6 +1,7 @@
 package com.vozimishko.backend.trip.model;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
@@ -12,6 +13,7 @@ import java.util.List;
 @Getter
 @Builder(toBuilder = true)
 @Table("trips")
+@EqualsAndHashCode
 public class Trip {
   @Id
   private Long id;
