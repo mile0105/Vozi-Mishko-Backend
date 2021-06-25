@@ -5,6 +5,7 @@ import com.vozimishko.backend.car.service.CarService;
 import com.vozimishko.backend.error.exceptions.BadRequestException;
 import com.vozimishko.backend.error.exceptions.NotFoundException;
 import com.vozimishko.backend.error.exceptions.UnauthorizedException;
+import com.vozimishko.backend.error.model.ErrorMessage;
 import com.vozimishko.backend.security.PrincipalService;
 import com.vozimishko.backend.trip.model.Trip;
 import com.vozimishko.backend.trip.model.TripApi;
@@ -50,7 +51,7 @@ public class TripService {
         .collect(Collectors.toList());
     }
 
-    throw new BadRequestException("");
+    throw new BadRequestException(ErrorMessage.EMPTY);
   }
 
   public Trip subscribeToTrip(Long tripId) {
@@ -69,7 +70,7 @@ public class TripService {
   }
 
   public Trip findByIdOrThrow(Long tripId) {
-    return tripRepository.findById(tripId).orElseThrow(() -> new NotFoundException("Trip not found"));
+    return tripRepository.findById(tripId).orElseThrow(() -> new NotFoundException(ErrorMessage.TRIP_NOT_FOUND));
   }
 
   public Trip unsubscribeFromTrip(Long tripId) {
@@ -114,7 +115,7 @@ public class TripService {
     List<UserDetails> userDetails = userService.getUserDetails(Collections.singletonList(trip.getDriverId()));
 
     if (userDetails.size() != 1) {
-      throw new BadRequestException("Something went wrong, if this problem persists, please contact us");
+      throw new BadRequestException(ErrorMessage.SOMETHING_WENT_WRONG);
     }
 
     return userDetails.get(0);
@@ -124,31 +125,31 @@ public class TripService {
   private void validateTripSeats(Trip trip) {
     Car car = carService.findByIdOrThrow(trip.getCarId());
     if (car.getNumberOfSeats() - 1 <= trip.getPassengerIds().size()) {
-      throw new BadRequestException("Trip is full, please select another trip");
+      throw new BadRequestException(ErrorMessage.TRIP_IS_FULL);
     }
   }
 
   private void validateDriverDoesntExist(Trip trip, Long loggedInUser) {
     if (trip.getDriverId().equals(loggedInUser)) {
-      throw new BadRequestException("Driver cannot further subscribe/unsubscribe from trip");
+      throw new BadRequestException(ErrorMessage.DRIVER_CANNOT_SUBSCRIBE);
     }
   }
 
   private void validateCustomerIdDoesntExist(Trip trip, Long loggedInUser) {
     if (trip.getPassengerIds().contains(loggedInUser.intValue())) {
-      throw new BadRequestException("Trip already contains customer");
+      throw new BadRequestException(ErrorMessage.TRIP_ALREADY_CONTAINS_CUSTOMER);
     }
   }
 
   private void validateCustomerIdExists(Trip trip, Long loggedInUser) {
     if (!trip.getPassengerIds().contains(loggedInUser.intValue())) {
-      throw new BadRequestException("Trip does not contain customer");
+      throw new BadRequestException(ErrorMessage.TRIP_DOES_NOT_CONTAINS_CUSTOMER);
     }
   }
 
   private void validateUserIsDriver(Trip trip, Long loggedInUser) {
     if (!trip.getDriverId().equals(loggedInUser)) {
-      throw new UnauthorizedException("You do not have permissions to view this");
+      throw new UnauthorizedException(ErrorMessage.NO_PERMISSIONS);
     }
   }
 

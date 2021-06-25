@@ -1,7 +1,9 @@
 package com.vozimishko.backend.user.service;
 
 import com.vozimishko.backend.error.exceptions.BadRequestException;
+import com.vozimishko.backend.error.exceptions.InternalServerErrorException;
 import com.vozimishko.backend.error.exceptions.NotFoundException;
+import com.vozimishko.backend.error.model.ErrorMessage;
 import com.vozimishko.backend.security.PrincipalService;
 import com.vozimishko.backend.security.jwt.CustomJwtToken;
 import com.vozimishko.backend.security.jwt.JwtUtils;
@@ -31,7 +33,8 @@ public class UserService {
   private final JwtUtils jwtUtils;
 
   public void register(UserApi userApi) {
-    checkIfUserWithEmailExists(userApi.getEmail(), userApi.getPhoneNumber());
+    checkIfUserWithEmailExists(userApi.getEmail());
+    checkIfUserWithPhoneNumberExists(userApi.getPhoneNumber());
 
     User user = userMapper.transformToDbModel(userApi);
     userRepository.save(user);
@@ -57,7 +60,7 @@ public class UserService {
 
     return userRepository.findById(loggedInUserId)
       .map(userMapper::transformFromDbModel)
-      .orElseThrow(() -> new IllegalStateException("Something went wrong"));
+      .orElseThrow(() -> new InternalServerErrorException(ErrorMessage.SOMETHING_WENT_WRONG));
   }
 
   public List<UserDetails> getUserDetails(List<Long> userIds) {
@@ -67,14 +70,19 @@ public class UserService {
       .collect(Collectors.toList());
   }
 
-  private void checkIfUserWithEmailExists(String email, String phoneNumber) {
+  private void checkIfUserWithEmailExists(String email) {
 
     Optional<User> existingUserByEmail = userRepository.findByEmail(email);
-    Optional<User> existingUserByPhoneNumber = userRepository.findByPhoneNumber(phoneNumber);
 
-    //todo optimize
-    if (existingUserByEmail.isPresent() || existingUserByPhoneNumber.isPresent()) {
-      throw new BadRequestException("User already exists");
+    if (existingUserByEmail.isPresent()) {
+      throw new BadRequestException(ErrorMessage.USER_EXISTS_EMAIL);
+    }
+  }
+
+  private void checkIfUserWithPhoneNumberExists(String phoneNumber) {
+    Optional<User> existingUserByPhoneNumber = userRepository.findByPhoneNumber(phoneNumber);
+    if (existingUserByPhoneNumber.isPresent()) {
+      throw new BadRequestException(ErrorMessage.USER_EXISTS_PHONE);
     }
   }
 }

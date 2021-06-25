@@ -71,14 +71,12 @@ class UserServiceTest {
   @Test
   void shouldThrowExceptionIfUserWithEmailExists() {
     when(userRepository.findByEmail(testUserApi.getEmail())).thenReturn(Optional.of(testUser));
-    when(userRepository.findByPhoneNumber(testUserApi.getPhoneNumber())).thenReturn(Optional.empty());
 
     assertThrows(BadRequestException.class, () -> userService.register(testUserApi),"User already exists");
   }
 
   @Test
   void shouldThrowExceptionIfUserWithPhoneNumberExists() {
-    when(userRepository.findByEmail(testUserApi.getEmail())).thenReturn(Optional.empty());
     when(userRepository.findByPhoneNumber(testUserApi.getPhoneNumber())).thenReturn(Optional.of(testUser));
 
     assertThrows(BadRequestException.class, () -> userService.register(testUserApi),"User already exists");

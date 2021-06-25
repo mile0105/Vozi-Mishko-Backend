@@ -1,5 +1,6 @@
 package com.vozimishko.backend.error.exceptions;
 
+import com.vozimishko.backend.error.model.ErrorMessage;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -8,7 +9,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 public class UnauthorizedException extends ApiException {
 
-  private final String message;
+  private final ErrorMessage errorMessage;
 
   @Override
   public HttpStatus getStatusCode() {

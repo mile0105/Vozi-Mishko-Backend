@@ -1,6 +1,7 @@
 package com.vozimishko.backend.error;
 
 import com.vozimishko.backend.error.exceptions.ApiException;
+import com.vozimishko.backend.error.model.ErrorMessageResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -11,7 +12,7 @@ public class VoziMishkoControllerAdvice {
   @ExceptionHandler(value = ApiException.class)
   public ResponseEntity<Object> onApiException(ApiException exception) {
 
-    ErrorMessage message = new ErrorMessage(exception.getMessage());
+    ErrorMessageResponse message = new ErrorMessageResponse(exception.getMessage());
 
     return new ResponseEntity<>(message, exception.getStatusCode());
   }
