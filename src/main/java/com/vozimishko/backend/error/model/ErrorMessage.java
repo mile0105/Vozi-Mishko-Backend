@@ -15,6 +15,7 @@ public enum ErrorMessage {
   DRIVER_CANNOT_SUBSCRIBE("Driver cannot further subscribe/unsubscribe from trip", "Возачот не може да се претплати/одплати од превозот", ""),
   USER_EXISTS_EMAIL("User with email already exists", "Веќе има корисник со тој е-маил", ""),
   USER_EXISTS_PHONE("User with phone number already exists", "Веќе има корисник со тој телефонски број", ""),
+  INVALID_DATE("Invalid date, please enter the date in format YYYY-MM-DD", "Погрешен датум, ве молиме внесете го датумот во формат: ГГГГ-ММ-ДД", ""),
   SOMETHING_WENT_WRONG("Something went wrong, if this problem persists, please contact us", "Нешто не е во ред, ако продолжете да го добивате овој резултат, ве молиме контактирајте не", ""),
   EMPTY("","","");
 

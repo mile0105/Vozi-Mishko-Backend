@@ -1,5 +1,7 @@
 package com.vozimishko.backend.trip;
 
+import com.vozimishko.backend.error.exceptions.BadRequestException;
+import com.vozimishko.backend.error.model.ErrorMessage;
 import com.vozimishko.backend.trip.model.Trip;
 import com.vozimishko.backend.trip.model.TripApi;
 import com.vozimishko.backend.trip.service.TripService;
@@ -15,8 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/trips")
@@ -32,9 +36,10 @@ public class TripController {
   }
 
   @GetMapping
-  public ResponseEntity<List<Trip>> getTrips(@RequestParam(name = "start", required = false) String start,
-                                             @RequestParam(name = "end", required = false) String end) {
-    List<Trip> trips = tripService.fetchTrips(start, end);
+  public ResponseEntity<Set<Trip>> getTrips(@RequestParam(name = "start", required = false) String start,
+                                             @RequestParam(name = "end", required = false) String end,
+                                             @RequestParam(name = "date", required = false) String dateString) {
+    Set<Trip> trips = tripService.fetchTrips(start, end, parseDate(dateString));
     return ResponseEntity.ok(trips);
   }
 
@@ -57,14 +62,14 @@ public class TripController {
   }
 
   @GetMapping("/my/driver")
-  public ResponseEntity<List<Trip>> getTripsWhereIDrive() {
-    List<Trip> trips = tripService.getTripsWhereIDrive();
+  public ResponseEntity<Set<Trip>> getTripsWhereIDrive() {
+    Set<Trip> trips = tripService.getTripsWhereIDrive();
     return ResponseEntity.ok(trips);
   }
 
   @GetMapping("/my/customer")
-  public ResponseEntity<List<Trip>> getTripsWhereIAmSubscribed() {
-    List<Trip> trips = tripService.getTripsWhereIAmSubscribed();
+  public ResponseEntity<Set<Trip>> getTripsWhereIAmSubscribed() {
+    Set<Trip> trips = tripService.getTripsWhereIAmSubscribed();
     return ResponseEntity.ok(trips);
   }
 
@@ -78,6 +83,18 @@ public class TripController {
   public ResponseEntity<UserDetails> getDriverDetails(@PathVariable(name = "id") Long tripId) {
     UserDetails driverDetails = tripService.getDriverDetails(tripId);
     return ResponseEntity.ok(driverDetails);
+  }
+
+  private LocalDate parseDate(String dateString) {
+    if (dateString == null) {
+      return null;
+    }
+
+    try {
+      return LocalDate.parse(dateString);
+    } catch (DateTimeParseException ex) {
+      throw new BadRequestException(ErrorMessage.INVALID_DATE);
+    }
   }
 
 }

@@ -16,16 +16,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,8 +49,15 @@ class TripServiceTest {
 
   private TripService tripService;
 
+  private LocalDateTime earlierTripTime;
+  private LocalDateTime middleTripTime;
+  private LocalDateTime laterTripTime;
+
   @BeforeEach
   void setUp() {
+    earlierTripTime = LocalDateTime.of(2021, 1, 1, 0, 0);
+    middleTripTime = LocalDateTime.of(2021, 1, 1, 1, 0);
+    laterTripTime = LocalDateTime.of(2021, 1, 2, 0, 0);
     tripService = new TripService(tripRepository, mapper, principalService, carService, userService);
   }
 
@@ -71,31 +81,82 @@ class TripServiceTest {
     String start = "start";
     String end = "end";
 
-    Trip trip = Trip.builder().build();
-    List<Trip> trips = Collections.singletonList(trip);
+    Trip earliestTrip = Trip.builder().timeOfDeparture(earlierTripTime).build();
+    Trip middleTrip = Trip.builder().timeOfDeparture(middleTripTime).build();
+    Trip latestTrip = Trip.builder().timeOfDeparture(laterTripTime).build();
+    Set<Trip> trips = new HashSet<>(Arrays.asList(latestTrip, earliestTrip, middleTrip));
+
     when(tripRepository.getTripsByOriginAndDestination("START", "END")).thenReturn(trips);
 
-    List<Trip> result = tripService.fetchTrips(start, end);
+    Set<Trip> result = tripService.fetchTrips(start, end, null);
 
-    assertThat(result).isEqualTo(trips);
+    List<Trip> tripsCopy = new ArrayList<>(result);
+    assertThat(result.size()).isEqualTo(3);
+    assertThat(tripsCopy.get(0)).isEqualTo(latestTrip);
+    assertThat(tripsCopy.get(1)).isEqualTo(middleTrip);
+    assertThat(tripsCopy.get(2)).isEqualTo(earliestTrip);
+  }
+
+  @Test
+  void shouldTestFilteringTripsOnGivenDateWhenDefiningStartAndEnd() {
+    String start = "start";
+    String end = "end";
+
+    Trip earliestTrip = Trip.builder().timeOfDeparture(earlierTripTime).build();
+    Trip middleTrip = Trip.builder().timeOfDeparture(middleTripTime).build();
+    Trip latestTrip = Trip.builder().timeOfDeparture(laterTripTime).build();
+    Set<Trip> trips = new HashSet<>(Arrays.asList(latestTrip, earliestTrip, middleTrip));
+
+    when(tripRepository.getTripsByOriginAndDestination("START", "END")).thenReturn(trips);
+
+    Set<Trip> result = tripService.fetchTrips(start, end, LocalDate.of(2021, 1, 1));
+
+    List<Trip> tripsCopy = new ArrayList<>(result);
+    assertThat(result.size()).isEqualTo(2);
+    assertThat(tripsCopy.get(0)).isEqualTo(middleTrip);
+    assertThat(tripsCopy.get(1)).isEqualTo(earliestTrip);
+  }
+
+  @Test
+  void shouldTestFetchingAllTripsOnGivenDateWhen() {
+    Trip earliestTrip = Trip.builder().timeOfDeparture(earlierTripTime).build();
+    Trip middleTrip = Trip.builder().timeOfDeparture(middleTripTime).build();
+    Trip latestTrip = Trip.builder().timeOfDeparture(laterTripTime).build();
+    Set<Trip> trips = new HashSet<>(Arrays.asList(latestTrip, earliestTrip, middleTrip));
+
+    when(tripRepository.findAll()).thenReturn(new HashSet<>(trips));
+
+    Set<Trip> result = tripService.fetchTrips(null, null, LocalDate.of(2021, 1, 1));
+
+    List<Trip> tripsCopy = new ArrayList<>(result);
+    assertThat(result.size()).isEqualTo(2);
+    assertThat(tripsCopy.get(0)).isEqualTo(middleTrip);
+    assertThat(tripsCopy.get(1)).isEqualTo(earliestTrip);
   }
 
   @Test
   void shouldTestFetchingAllTrips() {
 
-    Trip trip = Trip.builder().build();
-    List<Trip> trips = Collections.singletonList(trip);
-    when(tripRepository.findAll()).thenReturn(new ArrayList<>(trips));
+    Trip earliestTrip = Trip.builder().timeOfDeparture(earlierTripTime).build();
+    Trip middleTrip = Trip.builder().timeOfDeparture(middleTripTime).build();
+    Trip latestTrip = Trip.builder().timeOfDeparture(laterTripTime).build();
+    Set<Trip> trips = new HashSet<>(Arrays.asList(latestTrip, earliestTrip, middleTrip));
 
-    List<Trip> result = tripService.fetchTrips(null, null);
+    when(tripRepository.findAll()).thenReturn(new HashSet<>(trips));
 
-    assertThat(result).isEqualTo(trips);
+    Set<Trip> result = tripService.fetchTrips(null, null, null);
+
+    List<Trip> tripsCopy = new ArrayList<>(result);
+    assertThat(result.size()).isEqualTo(3);
+    assertThat(tripsCopy.get(0)).isEqualTo(latestTrip);
+    assertThat(tripsCopy.get(1)).isEqualTo(middleTrip);
+    assertThat(tripsCopy.get(2)).isEqualTo(earliestTrip);
   }
 
   @Test
   void shouldSubscribeToTrip() {
     Long tripId = 2L;
-    Long loggedInUserId = 1L;
+    long loggedInUserId = 1L;
     Long carId = 3L;
 
     when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
@@ -105,7 +166,7 @@ class TripServiceTest {
     Car testCar = Car.builder().numberOfSeats(5).build();
     when(carService.findByIdOrThrow(carId)).thenReturn(testCar);
 
-    Trip tripResult = trip.toBuilder().passengerIds(Collections.singletonList(loggedInUserId.intValue())).build();
+    Trip tripResult = trip.toBuilder().passengerIds(Collections.singletonList((int) loggedInUserId)).build();
 
     tripService.subscribeToTrip(tripId);
 
@@ -225,29 +286,32 @@ class TripServiceTest {
 
   @Test
   void shouldGetTripsWhereIAmDriver() {
-    Long loggedInUserId = 1L;
+    long loggedInUserId = 1L;
     when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
+    Trip trip = Trip.builder().timeOfDeparture(laterTripTime).carId(loggedInUserId + 1).driverId(loggedInUserId).build();
+    when(tripRepository.getTripsByDriverId(loggedInUserId)).thenReturn(Collections.singleton(trip));
 
-    List<Trip> trips = Collections.singletonList(Trip.builder().carId(loggedInUserId+1).driverId(loggedInUserId).build());
-    when(tripRepository.getTripsByDriverId(loggedInUserId)).thenReturn(trips);
+    Set<Trip> result = tripService.getTripsWhereIDrive();
+    List<Trip> tripCopy = new ArrayList<>(result);
 
-    List<Trip> result = tripService.getTripsWhereIDrive();
-
-    assertThat(result).isEqualTo(trips);
+    assertThat(tripCopy.size()).isEqualTo(1);
+    assertThat(tripCopy.get(0)).isEqualTo(trip);
   }
 
 
   @Test
   void shouldGetTripsWhereIAmPassenger() {
-    Long loggedInUserId = 1L;
+    long loggedInUserId = 1L;
     when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
+    Trip trip = Trip.builder().timeOfDeparture(laterTripTime).carId(loggedInUserId + 1).driverId(loggedInUserId - 1).build();
 
-    List<Trip> trips = Collections.singletonList(Trip.builder().carId(loggedInUserId+1).driverId(loggedInUserId-1).build());
-    when(tripRepository.getTripsByPassengerId(loggedInUserId)).thenReturn(trips);
+    when(tripRepository.getTripsByPassengerId(loggedInUserId)).thenReturn(Collections.singleton(trip));
 
-    List<Trip> result = tripService.getTripsWhereIAmSubscribed();
+    Set<Trip> result = tripService.getTripsWhereIAmSubscribed();
+    List<Trip> tripCopy = new ArrayList<>(result);
 
-    assertThat(result).isEqualTo(trips);
+    assertThat(tripCopy.size()).isEqualTo(1);
+    assertThat(tripCopy.get(0)).isEqualTo(trip);
   }
 
   @Test

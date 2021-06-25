@@ -14,7 +14,8 @@ import java.util.List;
 @Builder(toBuilder = true)
 @Table("trips")
 @EqualsAndHashCode
-public class Trip {
+public class Trip implements Comparable<Trip> {
+
   @Id
   private Long id;
   private String start;
@@ -28,4 +29,9 @@ public class Trip {
   private Long carId;
   @Column("passenger_ids")
   private List<Integer> passengerIds;
+
+  @Override
+  public int compareTo(Trip other) {
+    return other.getTimeOfDeparture().isAfter(timeOfDeparture)? 1: -1;
+  }
 }

@@ -16,9 +16,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -40,18 +43,23 @@ public class TripService {
     return tripRepository.save(mappedTrip);
   }
 
-  public List<Trip> fetchTrips(String start, String end) {
+  public Set<Trip> fetchTrips(String start, String end, LocalDate date) {
+
+    Set<Trip> trips = null;
 
     if (StringUtils.hasText(start) && StringUtils.hasText(end)) {
-      return tripRepository.getTripsByOriginAndDestination(start.toUpperCase(), end.toUpperCase());
+      trips = tripRepository.getTripsByOriginAndDestination(start.toUpperCase(), end.toUpperCase());
     }
 
     if(!StringUtils.hasText(start) && !StringUtils.hasText(end)) {
-      return StreamSupport.stream(tripRepository.findAll().spliterator(), false)
-        .collect(Collectors.toList());
+      trips = StreamSupport.stream(tripRepository.findAll().spliterator(), false).collect(Collectors.toSet());
     }
 
-    throw new BadRequestException(ErrorMessage.EMPTY);
+    if (trips == null) {
+      throw new BadRequestException(ErrorMessage.EMPTY);
+    }
+
+    return filterTripsByDateAndSort(trips, date);
   }
 
   public Trip subscribeToTrip(Long tripId) {
@@ -87,16 +95,16 @@ public class TripService {
     return tripRepository.save(newTrip);
   }
 
-  public List<Trip> getTripsWhereIDrive() {
+  public Set<Trip> getTripsWhereIDrive() {
     Long loggedInUserId = principalService.getLoggedInUserId();
 
-    return tripRepository.getTripsByDriverId(loggedInUserId);
+    return new TreeSet<>(tripRepository.getTripsByDriverId(loggedInUserId));
   }
 
-  public List<Trip> getTripsWhereIAmSubscribed() {
+  public Set<Trip> getTripsWhereIAmSubscribed() {
     Long loggedInUserId = principalService.getLoggedInUserId();
 
-    return tripRepository.getTripsByPassengerId(loggedInUserId);
+    return new TreeSet<>(tripRepository.getTripsByPassengerId(loggedInUserId));
   }
 
   public List<UserDetails> getMyPassengerDetails(Long tripId) {
@@ -151,6 +159,14 @@ public class TripService {
     if (!trip.getDriverId().equals(loggedInUser)) {
       throw new UnauthorizedException(ErrorMessage.NO_PERMISSIONS);
     }
+  }
+
+  private Set<Trip> filterTripsByDateAndSort(Set<Trip> trips, LocalDate date) {
+    if (date != null) {
+      return trips.stream().filter(trip -> trip.getTimeOfDeparture().toLocalDate().equals(date)).collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    return new TreeSet<>(trips);
   }
 
 }
