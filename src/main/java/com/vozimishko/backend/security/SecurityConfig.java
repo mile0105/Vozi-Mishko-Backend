@@ -56,7 +56,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
       .and()
       .addFilterBefore(new JwtTokenAuthenticationFilter(userDetailsService, jwtUtils), UsernamePasswordAuthenticationFilter.class)
       .authorizeRequests()
-      .antMatchers("/api/v1/users/register**", "/api/v1/users/register/google**", "/api/v1/users/login**").permitAll()
+      .antMatchers("/api/v1/users/register**", "/api/v1/users/register/google**", "/api/v1/users/login**", "/api/v1/cities/**").permitAll()
       .antMatchers("/oauth2/**").permitAll()
       .anyRequest().authenticated();
   }

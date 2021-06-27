@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 public enum ErrorMessage {
   INVALID_REQUEST("Invalid request", "Погрешно барање", ""),
   CAR_NOT_FOUND("Car not found", "Автомобилот не е пронајден", ""),
+  CITY_NOT_FOUND("City not found", "Градот не е пронајден", ""),
   TRIP_NOT_FOUND("Trip not found", "Превозот не е пронајден", ""),
   TRIP_IS_FULL("Trip is full, please select another trip", "Превозот е полн, ве молиме одберете друг", ""),
   TRIP_ALREADY_CONTAINS_CUSTOMER("Trip already contains customer", "Превозот веќе го содржи патникот", ""),
