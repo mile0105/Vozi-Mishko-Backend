@@ -18,7 +18,7 @@ public class CityController {
 
   private final CityService cityService;
 
-  @GetMapping("/")
+  @GetMapping("")
   public ResponseEntity<Set<City>> getAllCities() {
     return ResponseEntity.ok(cityService.getAllCities());
   }
