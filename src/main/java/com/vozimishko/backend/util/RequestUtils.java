@@ -26,7 +26,7 @@ public final class RequestUtils {
 
   public RequestLanguage getRequestLanguage() {
     String language = getCurrentHttpRequest().getParameter(LANG_PARAM);
-    return RequestLanguage.findFromLanguageText(language);
+    return RequestLanguage.findFromLanguageText(language.toLowerCase());
   }
 
 }
