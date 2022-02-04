@@ -7,11 +7,9 @@ import com.vozimishko.backend.error.model.ErrorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -25,7 +23,7 @@ public class CityService {
     return StreamSupport.stream(cityIterable.spliterator(), false).collect(Collectors.toCollection(TreeSet::new));
   }
 
-  public City findById(Long id) {
+  public City findByIdOrThrow(Long id) {
     return cityRepository.findById(id).orElseThrow(() -> new BadRequestException(ErrorMessage.CITY_NOT_FOUND));
   }
 }

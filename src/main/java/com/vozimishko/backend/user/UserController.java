@@ -6,11 +6,9 @@ import com.vozimishko.backend.user.service.UserService;
 import com.vozimishko.backend.util.models.EmptyResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("api/v1/users")
@@ -20,14 +18,14 @@ public class UserController {
   private final UserService userService;
 
   @PostMapping("/register")
-  public ResponseEntity<EmptyResponse> register(@RequestBody UserApi userApi) {
+  public ResponseEntity<EmptyResponse> register(@Valid @RequestBody UserApi userApi) {
 
     userService.register(userApi);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
   @PostMapping("/login")
-  public ResponseEntity<CustomJwtToken> login(@RequestBody UserApi userApi) {
+  public ResponseEntity<CustomJwtToken> login(@Valid @RequestBody UserApi userApi) {
     CustomJwtToken jwtToken = userService.login(userApi.getEmail(), userApi.getPassword());
     return ResponseEntity.ok(jwtToken);
   }

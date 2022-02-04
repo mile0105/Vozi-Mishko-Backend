@@ -1,6 +1,7 @@
 package com.vozimishko.backend.util.models;
 
 import lombok.RequiredArgsConstructor;
+
 import java.util.EnumSet;
 
 @RequiredArgsConstructor
@@ -15,7 +16,7 @@ public enum RequestLanguage {
     if (languageText == null) {
       return ENGLISH;
     }
-    return EnumSet.allOf(RequestLanguage.class).stream().filter(em -> languageText.equals(em.languageText)).findFirst().orElse(ENGLISH);
+    return EnumSet.allOf(RequestLanguage.class).stream().filter(em -> languageText.equalsIgnoreCase(em.languageText)).findFirst().orElse(ENGLISH);
   }
 
 }

@@ -18,9 +18,8 @@ public class Trip implements Comparable<Trip> {
 
   @Id
   private Long id;
-  private String start;
-  @Column("END")
-  private String end;
+  private Long startCityId;
+  private Long endCityId;
   @Column("time_of_departure")
   private LocalDateTime timeOfDeparture;
   @Column("driver_id")

@@ -2,7 +2,6 @@ package com.vozimishko.backend.user.service;
 
 import com.vozimishko.backend.error.exceptions.BadRequestException;
 import com.vozimishko.backend.error.exceptions.InternalServerErrorException;
-import com.vozimishko.backend.error.exceptions.NotFoundException;
 import com.vozimishko.backend.error.model.ErrorMessage;
 import com.vozimishko.backend.security.PrincipalService;
 import com.vozimishko.backend.security.jwt.CustomJwtToken;

@@ -54,7 +54,7 @@ class CityServiceTest {
 
     when(cityRepository.findById(1L)).thenReturn(Optional.of(city));
 
-    City result = cityService.findById(1L);
+    City result = cityService.findByIdOrThrow(1L);
 
     assertEquals(city, result);
   }
@@ -64,7 +64,7 @@ class CityServiceTest {
 
     when(cityRepository.findById(any())).thenReturn(Optional.empty());
 
-    BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> cityService.findById(1L));
+    BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> cityService.findByIdOrThrow(1L));
 
     assertEquals(ErrorMessage.CITY_NOT_FOUND, badRequestException.getErrorMessage());
   }

@@ -2,6 +2,7 @@ package com.vozimishko.backend.trip.service;
 
 import com.vozimishko.backend.car.model.Car;
 import com.vozimishko.backend.car.service.CarService;
+import com.vozimishko.backend.cities.service.CityService;
 import com.vozimishko.backend.error.exceptions.BadRequestException;
 import com.vozimishko.backend.error.exceptions.NotFoundException;
 import com.vozimishko.backend.error.exceptions.UnauthorizedException;
@@ -17,11 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -33,11 +30,13 @@ public class TripService {
   private final TripMapper mapper;
   private final PrincipalService principalService;
   private final CarService carService;
+  private final CityService cityService;
   private final UserService userService;
 
   public Trip addTrip(TripApi tripApi) {
     Long loggedInUserId = principalService.getLoggedInUserId();
 
+    validateTrip(tripApi);
     Trip mappedTrip = mapper.mapToDbModelForAddition(tripApi, loggedInUserId);
 
     return tripRepository.save(mappedTrip);
@@ -129,6 +128,22 @@ public class TripService {
     return userDetails.get(0);
   }
 
+  private void validateTrip(TripApi tripApi) {
+
+    //if we have a city, it's already valid
+    cityService.findByIdOrThrow(tripApi.getStartCityId());
+    cityService.findByIdOrThrow(tripApi.getEndCityId());
+
+    if (Objects.equals(tripApi.getEndCityId(), tripApi.getStartCityId())) {
+      throw new BadRequestException(ErrorMessage.TRIP_SAME_CITIES);
+    }
+
+    Set<Long> loggedInUserCarIds = carService.getLoggedInUserCars().stream().map(Car::getId).collect(Collectors.toSet());
+
+    if (!loggedInUserCarIds.contains(tripApi.getCarId())) {
+      throw new BadRequestException(ErrorMessage.CAR_UNAVAILABLE);
+    }
+  }
 
   private void validateTripSeats(Trip trip) {
     Car car = carService.findByIdOrThrow(trip.getCarId());

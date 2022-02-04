@@ -1,8 +1,8 @@
 package com.vozimishko.backend.error.exceptions;
 
 import com.vozimishko.backend.error.model.ErrorMessage;
-import com.vozimishko.backend.util.models.RequestLanguage;
 import com.vozimishko.backend.util.RequestUtils;
+import com.vozimishko.backend.util.models.RequestLanguage;
 import org.springframework.http.HttpStatus;
 
 public abstract class ApiException extends RuntimeException {

@@ -17,8 +17,8 @@ CREATE TABLE USERS(
 
 CREATE TABLE TRIPS (
                        ID SERIAL NOT NULL PRIMARY KEY,
-                       START TEXT NOT NULL,
-                       "END" TEXT NOT NULL,
+                       START SERIAL NOT NULL,
+                       "END" SERIAL NOT NULL,
                        DRIVER_ID SERIAL NOT NULL,
                        CONSTRAINT DRIVER_ID_CONSTRAINT FOREIGN KEY(DRIVER_ID) REFERENCES USERS(ID)
 );

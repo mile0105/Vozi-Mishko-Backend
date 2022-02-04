@@ -2,8 +2,11 @@ package com.vozimishko.backend.trip.service;
 
 import com.vozimishko.backend.car.model.Car;
 import com.vozimishko.backend.car.service.CarService;
+import com.vozimishko.backend.cities.model.City;
+import com.vozimishko.backend.cities.service.CityService;
 import com.vozimishko.backend.error.exceptions.BadRequestException;
 import com.vozimishko.backend.error.exceptions.UnauthorizedException;
+import com.vozimishko.backend.error.model.ErrorMessage;
 import com.vozimishko.backend.security.PrincipalService;
 import com.vozimishko.backend.trip.model.Trip;
 import com.vozimishko.backend.trip.model.TripApi;
@@ -27,6 +30,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -46,6 +50,8 @@ class TripServiceTest {
   private CarService carService;
   @Mock
   private UserService userService;
+  @Mock
+  private CityService cityService;
 
   private TripService tripService;
 
@@ -58,22 +64,73 @@ class TripServiceTest {
     earlierTripTime = LocalDateTime.of(2021, 1, 1, 0, 0);
     middleTripTime = LocalDateTime.of(2021, 1, 1, 1, 0);
     laterTripTime = LocalDateTime.of(2021, 1, 2, 0, 0);
-    tripService = new TripService(tripRepository, mapper, principalService, carService, userService);
+    tripService = new TripService(tripRepository, mapper, principalService, carService, cityService, userService);
   }
 
   @Test
-  void shouldTestAddingTrip() {
+  void shouldTestAddingTripSuccessfully() {
     Long loggedInUserId = 1L;
-    TripApi tripApi = TripApi.builder().build();
+    TripApi tripApi = TripApi.builder().startCityId(1L).endCityId(2L).carId(1L).build();
     Trip trip = Trip.builder().build();
+    Car car = Car.builder().id(1L).build();
     Trip savedTrip = Trip.builder().driverId(loggedInUserId).build();
     when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
     when(mapper.mapToDbModelForAddition(tripApi, loggedInUserId)).thenReturn(trip);
     when(tripRepository.save(trip)).thenReturn(savedTrip);
+    when(carService.getLoggedInUserCars()).thenReturn(Collections.singletonList(car));
 
     Trip result = tripService.addTrip(tripApi);
 
     assertThat(result).isEqualTo(savedTrip);
+  }
+
+  @Test
+  void shouldThrowBadRequestExceptionIfStartCityCannotBeFound() {
+    Long loggedInUserId = 1L;
+    TripApi tripApi = TripApi.builder().startCityId(1L).build();
+    when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
+    when(cityService.findByIdOrThrow(1L)).thenThrow(new BadRequestException(ErrorMessage.CITY_NOT_FOUND));
+
+    BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.addTrip(tripApi));
+
+    assertEquals(ErrorMessage.CITY_NOT_FOUND, exception.getErrorMessage());
+  }
+
+  @Test
+  void shouldThrowBadRequestExceptionIfEndCityCannotBeFound() {
+    Long loggedInUserId = 1L;
+    TripApi tripApi = TripApi.builder().startCityId(1L).endCityId(2L).build();
+    when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
+    when(cityService.findByIdOrThrow(1L)).thenReturn(new City());
+    when(cityService.findByIdOrThrow(2L)).thenThrow(new BadRequestException(ErrorMessage.CITY_NOT_FOUND));
+
+    BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.addTrip(tripApi));
+
+    assertEquals(ErrorMessage.CITY_NOT_FOUND, exception.getErrorMessage());
+  }
+
+  @Test
+  void shouldThrowBadRequestExceptionIfStartAndCitiesAreTheSame() {
+    Long loggedInUserId = 1L;
+    TripApi tripApi = TripApi.builder().startCityId(1L).endCityId(1L).build();
+    when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
+
+    BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.addTrip(tripApi));
+
+    assertEquals(ErrorMessage.TRIP_SAME_CITIES, exception.getErrorMessage());
+  }
+
+  @Test
+  void shouldThrowBadRequestExceptionIfCarIsNotAvailable() {
+    Long loggedInUserId = 1L;
+    TripApi tripApi = TripApi.builder().startCityId(1L).endCityId(2L).carId(1L).build();
+    Car car = Car.builder().id(2L).build();
+    when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
+    when(carService.getLoggedInUserCars()).thenReturn(Collections.singletonList(car));
+
+    BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.addTrip(tripApi));
+
+    assertEquals(ErrorMessage.CAR_UNAVAILABLE, exception.getErrorMessage());
   }
 
   @Test
@@ -183,9 +240,7 @@ class TripServiceTest {
     Trip trip = Trip.builder().driverId(loggedInUserId).carId(carId).passengerIds(new ArrayList<>()).build();
     when(tripRepository.findById(tripId)).thenReturn(Optional.of(trip));
 
-    assertThrows(BadRequestException.class, () -> {
-      tripService.subscribeToTrip(tripId);
-    }, "Driver cannot further subscribe/unsubscribe from trip");
+    assertThrows(BadRequestException.class, () -> tripService.subscribeToTrip(tripId), "Driver cannot further subscribe/unsubscribe from trip");
 
     verify(carService, never()).findByIdOrThrow(carId);
     verify(tripRepository, never()).save(any());
@@ -194,17 +249,15 @@ class TripServiceTest {
   @Test
   void shouldThrowExceptionIfUserIsContainedWithinPassengersWhenSubscribing() {
     Long tripId = 2L;
-    Long loggedInUserId = 1L;
+    long loggedInUserId = 1L;
     Long carId = 3L;
 
     when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
     Trip trip = Trip.builder().driverId(loggedInUserId + 1).carId(carId)
-      .passengerIds(Collections.singletonList(loggedInUserId.intValue())).build();
+      .passengerIds(Collections.singletonList((int) loggedInUserId)).build();
     when(tripRepository.findById(tripId)).thenReturn(Optional.of(trip));
 
-    assertThrows(BadRequestException.class, () -> {
-      tripService.subscribeToTrip(tripId);
-    }, "Trip already contains customer");
+    assertThrows(BadRequestException.class, () -> tripService.subscribeToTrip(tripId), "Trip already contains customer");
 
     verify(carService, never()).findByIdOrThrow(carId);
     verify(tripRepository, never()).save(any());
@@ -213,7 +266,7 @@ class TripServiceTest {
   @Test
   void shouldThrowExceptionIfCarIsFullWhenSubscribing() {
     Long tripId = 2L;
-    Long loggedInUserId = 1L;
+    long loggedInUserId = 1L;
     Long carId = 3L;
 
     when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
@@ -224,9 +277,7 @@ class TripServiceTest {
     Car testCar = Car.builder().numberOfSeats(5).build();
     when(carService.findByIdOrThrow(carId)).thenReturn(testCar);
 
-    assertThrows(BadRequestException.class, () -> {
-      tripService.subscribeToTrip(tripId);
-    }, "Trip is full, please select another trip");
+    assertThrows(BadRequestException.class, () -> tripService.subscribeToTrip(tripId), "Trip is full, please select another trip");
 
     verify(tripRepository, never()).save(any());
   }
@@ -234,12 +285,12 @@ class TripServiceTest {
   @Test
   void shouldUnSubscribeFromTrip() {
     Long tripId = 2L;
-    Long loggedInUserId = 1L;
+    long loggedInUserId = 1L;
     Long carId = 3L;
 
     when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
     Trip trip = Trip.builder().driverId(loggedInUserId + 1).carId(carId)
-      .passengerIds(Collections.singletonList(loggedInUserId.intValue())).build();
+      .passengerIds(Collections.singletonList((int) loggedInUserId)).build();
     when(tripRepository.findById(tripId)).thenReturn(Optional.of(trip));
 
     Trip tripResult = trip.toBuilder().passengerIds(new ArrayList<>()).build();
@@ -259,9 +310,7 @@ class TripServiceTest {
     Trip trip = Trip.builder().driverId(loggedInUserId).carId(carId).passengerIds(new ArrayList<>()).build();
     when(tripRepository.findById(tripId)).thenReturn(Optional.of(trip));
 
-    assertThrows(BadRequestException.class, () -> {
-      tripService.unsubscribeFromTrip(tripId);
-    }, "Driver cannot further subscribe/unsubscribe from trip");
+    assertThrows(BadRequestException.class, () -> tripService.unsubscribeFromTrip(tripId), "Driver cannot further subscribe/unsubscribe from trip");
 
     verify(tripRepository, never()).save(any());
   }
@@ -269,7 +318,7 @@ class TripServiceTest {
   @Test
   void shouldThrowExceptionIfUserIsNotContainedWithinPassengersWhenUnsubscribing() {
     Long tripId = 2L;
-    Long loggedInUserId = 1L;
+    long loggedInUserId = 1L;
     Long carId = 3L;
 
     when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
@@ -277,9 +326,7 @@ class TripServiceTest {
       .passengerIds(new ArrayList<>()).build();
     when(tripRepository.findById(tripId)).thenReturn(Optional.of(trip));
 
-    assertThrows(BadRequestException.class, () -> {
-      tripService.unsubscribeFromTrip(tripId);
-    }, "Trip does not contain customer");
+    assertThrows(BadRequestException.class, () -> tripService.unsubscribeFromTrip(tripId), "Trip does not contain customer");
 
     verify(tripRepository, never()).save(any());
   }
@@ -303,7 +350,7 @@ class TripServiceTest {
   void shouldGetTripsWhereIAmPassenger() {
     long loggedInUserId = 1L;
     when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
-    Trip trip = Trip.builder().timeOfDeparture(laterTripTime).carId(loggedInUserId + 1).driverId(loggedInUserId - 1).build();
+    Trip trip = Trip.builder().timeOfDeparture(laterTripTime).carId(loggedInUserId + 1).driverId(loggedInUserId + 2).build();
 
     when(tripRepository.getTripsByPassengerId(loggedInUserId)).thenReturn(Collections.singleton(trip));
 
@@ -338,24 +385,22 @@ class TripServiceTest {
 
   @Test
   void shouldThrowExceptionWhenGettingPassengerDetailsIfUserIsNotADriver() {
-    Long loggedInUserId = 1L;
+    long loggedInUserId = 1L;
     Long tripId = 5L;
     when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
     Trip trip = Trip.builder().driverId(loggedInUserId + 1).build();
     when(tripRepository.findById(tripId)).thenReturn(Optional.of(trip));
 
-    assertThrows(UnauthorizedException.class, () -> {
-      tripService.getMyPassengerDetails(tripId);
-    }, "You do not have permissions to view this");
+    assertThrows(UnauthorizedException.class, () -> tripService.getMyPassengerDetails(tripId), "You do not have permissions to view this");
   }
 
   @Test
   void shouldGetDriverDetails() {
-    Long loggedInUserId = 1L;
+    long loggedInUserId = 1L;
     Long tripId = 5L;
     when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
     Trip trip = Trip.builder().driverId(loggedInUserId + 1)
-      .passengerIds(Collections.singletonList(loggedInUserId.intValue())).build();
+      .passengerIds(Collections.singletonList((int) loggedInUserId)).build();
     when(tripRepository.findById(tripId)).thenReturn(Optional.of(trip));
     UserDetails userDetails = UserDetails.builder().fullName("Driver").build();
     when(userService.getUserDetails(Collections.singletonList(loggedInUserId + 1)))
@@ -368,14 +413,12 @@ class TripServiceTest {
 
   @Test
   void shouldThrowExceptionWhenGettingDriverDetailsIfUserIsNotAPassenger() {
-    Long loggedInUserId = 1L;
+    long loggedInUserId = 1L;
     Long tripId = 5L;
     when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
     Trip trip = Trip.builder().driverId(loggedInUserId + 1).passengerIds(new ArrayList<>()).build();
     when(tripRepository.findById(tripId)).thenReturn(Optional.of(trip));
 
-    assertThrows(BadRequestException.class, () -> {
-      tripService.getDriverDetails(tripId);
-    }, "Trip does not contain customer");
+    assertThrows(BadRequestException.class, () -> tripService.getDriverDetails(tripId), "Trip does not contain customer");
   }
 }

@@ -1,9 +1,9 @@
 package com.vozimishko.backend.security;
 
-import com.vozimishko.backend.util.models.RequestLanguage;
 import com.vozimishko.backend.user.model.User;
 import com.vozimishko.backend.user.repository.UserRepository;
 import com.vozimishko.backend.util.RequestUtils;
+import com.vozimishko.backend.util.models.RequestLanguage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
