@@ -5,6 +5,7 @@ import com.vozimishko.backend.util.models.RequestLanguage;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.lang.NonNull;
 
 @Data
 @Table("city")
@@ -17,7 +18,7 @@ public class City implements Comparable<City> {
   private String albanianName;
 
   @Override
-  public int compareTo(City other) {
+  public int compareTo(@NonNull City other) {
     RequestLanguage requestLanguage = RequestUtils.getRequestLanguage();
     switch (requestLanguage) {
       case ENGLISH: return englishName.compareTo(other.englishName);
