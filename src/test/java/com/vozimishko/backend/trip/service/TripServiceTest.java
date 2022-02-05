@@ -94,6 +94,7 @@ class TripServiceTest {
     BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.addTrip(tripRequestBody));
 
     assertEquals(ErrorMessage.CITY_NOT_FOUND, exception.getErrorMessage());
+    verify(tripRepository, never()).save(any());
   }
 
   @Test
@@ -107,6 +108,7 @@ class TripServiceTest {
     BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.addTrip(tripRequestBody));
 
     assertEquals(ErrorMessage.CITY_NOT_FOUND, exception.getErrorMessage());
+    verify(tripRepository, never()).save(any());
   }
 
   @Test
@@ -131,6 +133,7 @@ class TripServiceTest {
     BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.addTrip(tripRequestBody));
 
     assertEquals(ErrorMessage.CAR_UNAVAILABLE, exception.getErrorMessage());
+    verify(tripRepository, never()).save(any());
   }
 
   @Test
