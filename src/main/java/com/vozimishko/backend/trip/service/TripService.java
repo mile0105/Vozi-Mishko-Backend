@@ -165,7 +165,7 @@ public class TripService {
 
   private void validateCustomerIdExists(Trip trip, Long loggedInUser) {
     if (!trip.getPassengerIds().contains(loggedInUser.intValue())) {
-      throw new BadRequestException(ErrorMessage.TRIP_DOES_NOT_CONTAINS_CUSTOMER);
+      throw new BadRequestException(ErrorMessage.TRIP_DOES_NOT_CONTAIN_CUSTOMER);
     }
   }
 

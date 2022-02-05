@@ -23,8 +23,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class RideRequestServiceTest {
@@ -87,6 +86,7 @@ class RideRequestServiceTest {
     BadRequestException exception = assertThrows(BadRequestException.class, () -> rideRequestService.addRideRequest(rideRequestDto));
 
     assertEquals(ErrorMessage.CITY_NOT_FOUND, exception.getErrorMessage());
+    verify(rideRequestRepository, never()).save(any());
   }
 
   @Test
@@ -100,6 +100,7 @@ class RideRequestServiceTest {
     BadRequestException exception = assertThrows(BadRequestException.class, () -> rideRequestService.addRideRequest(rideRequestDto));
 
     assertEquals(ErrorMessage.CITY_NOT_FOUND, exception.getErrorMessage());
+    verify(rideRequestRepository, never()).save(any());
   }
 
   @Test
@@ -111,6 +112,7 @@ class RideRequestServiceTest {
     BadRequestException exception = assertThrows(BadRequestException.class, () -> rideRequestService.addRideRequest(rideRequestDto));
 
     assertEquals(ErrorMessage.TRIP_SAME_CITIES, exception.getErrorMessage());
+    verify(rideRequestRepository, never()).save(any());
   }
 
   @Test

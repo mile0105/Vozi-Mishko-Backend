@@ -13,7 +13,7 @@ public enum ErrorMessage {
   TRIP_SAME_CITIES("Start city can not be the same as end city", "Почетниот град не може да биде ист со крајниот град" , ""),
   TRIP_IS_FULL("Trip is full, please select another trip", "Превозот е полн, ве молиме одберете друг", ""),
   TRIP_ALREADY_CONTAINS_CUSTOMER("Trip already contains customer", "Превозот веќе го содржи патникот", ""),
-  TRIP_DOES_NOT_CONTAINS_CUSTOMER("Trip does not contain customer", "Превозот не го содржи патникот", ""),
+  TRIP_DOES_NOT_CONTAIN_CUSTOMER("Trip does not contain customer", "Превозот не го содржи патникот", ""),
   NO_PERMISSIONS("You do not have permissions to view this", "Немате пристап", ""),
   DRIVER_CANNOT_SUBSCRIBE("Driver cannot further subscribe/unsubscribe from trip", "Возачот не може да се претплати/одплати од превозот", ""),
   USER_EXISTS_EMAIL("User with email already exists", "Веќе има корисник со тој е-маил", ""),

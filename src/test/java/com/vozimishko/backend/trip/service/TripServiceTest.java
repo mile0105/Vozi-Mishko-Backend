@@ -40,7 +40,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class TripServiceTest {
 
-  //todo change assertthrows
   @Mock
   private TripRepository tripRepository;
   @Mock
@@ -241,8 +240,9 @@ class TripServiceTest {
     Trip trip = Trip.builder().driverId(loggedInUserId).carId(carId).passengerIds(new ArrayList<>()).build();
     when(tripRepository.findById(tripId)).thenReturn(Optional.of(trip));
 
-    assertThrows(BadRequestException.class, () -> tripService.subscribeToTrip(tripId), "Driver cannot further subscribe/unsubscribe from trip");
+    BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.subscribeToTrip(tripId));
 
+    assertEquals(ErrorMessage.DRIVER_CANNOT_SUBSCRIBE, exception.getErrorMessage());
     verify(carService, never()).findByIdOrThrow(carId);
     verify(tripRepository, never()).save(any());
   }
@@ -258,8 +258,9 @@ class TripServiceTest {
       .passengerIds(Collections.singletonList((int) loggedInUserId)).build();
     when(tripRepository.findById(tripId)).thenReturn(Optional.of(trip));
 
-    assertThrows(BadRequestException.class, () -> tripService.subscribeToTrip(tripId), "Trip already contains customer");
+    BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.subscribeToTrip(tripId));
 
+    assertEquals(ErrorMessage.TRIP_ALREADY_CONTAINS_CUSTOMER, exception.getErrorMessage());
     verify(carService, never()).findByIdOrThrow(carId);
     verify(tripRepository, never()).save(any());
   }
@@ -278,8 +279,9 @@ class TripServiceTest {
     Car testCar = Car.builder().numberOfSeats(5).build();
     when(carService.findByIdOrThrow(carId)).thenReturn(testCar);
 
-    assertThrows(BadRequestException.class, () -> tripService.subscribeToTrip(tripId), "Trip is full, please select another trip");
+    BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.subscribeToTrip(tripId));
 
+    assertEquals(ErrorMessage.TRIP_IS_FULL, exception.getErrorMessage());
     verify(tripRepository, never()).save(any());
   }
 
@@ -311,8 +313,9 @@ class TripServiceTest {
     Trip trip = Trip.builder().driverId(loggedInUserId).carId(carId).passengerIds(new ArrayList<>()).build();
     when(tripRepository.findById(tripId)).thenReturn(Optional.of(trip));
 
-    assertThrows(BadRequestException.class, () -> tripService.unsubscribeFromTrip(tripId), "Driver cannot further subscribe/unsubscribe from trip");
+    BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.unsubscribeFromTrip(tripId));
 
+    assertEquals(ErrorMessage.DRIVER_CANNOT_SUBSCRIBE, exception.getErrorMessage());
     verify(tripRepository, never()).save(any());
   }
 
@@ -327,8 +330,9 @@ class TripServiceTest {
       .passengerIds(new ArrayList<>()).build();
     when(tripRepository.findById(tripId)).thenReturn(Optional.of(trip));
 
-    assertThrows(BadRequestException.class, () -> tripService.unsubscribeFromTrip(tripId), "Trip does not contain customer");
+    BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.unsubscribeFromTrip(tripId));
 
+    assertEquals(ErrorMessage.TRIP_DOES_NOT_CONTAIN_CUSTOMER, exception.getErrorMessage());
     verify(tripRepository, never()).save(any());
   }
 
@@ -392,7 +396,8 @@ class TripServiceTest {
     Trip trip = Trip.builder().driverId(loggedInUserId + 1).build();
     when(tripRepository.findById(tripId)).thenReturn(Optional.of(trip));
 
-    assertThrows(UnauthorizedException.class, () -> tripService.getMyPassengerDetails(tripId), "You do not have permissions to view this");
+    UnauthorizedException unauthorizedException = assertThrows(UnauthorizedException.class, () -> tripService.getMyPassengerDetails(tripId));
+    assertEquals(ErrorMessage.NO_PERMISSIONS, unauthorizedException.getErrorMessage());
   }
 
   @Test
@@ -420,6 +425,8 @@ class TripServiceTest {
     Trip trip = Trip.builder().driverId(loggedInUserId + 1).passengerIds(new ArrayList<>()).build();
     when(tripRepository.findById(tripId)).thenReturn(Optional.of(trip));
 
-    assertThrows(BadRequestException.class, () -> tripService.getDriverDetails(tripId), "Trip does not contain customer");
+    BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.getDriverDetails(tripId));
+
+    assertEquals(ErrorMessage.TRIP_DOES_NOT_CONTAIN_CUSTOMER, exception.getErrorMessage());
   }
 }
