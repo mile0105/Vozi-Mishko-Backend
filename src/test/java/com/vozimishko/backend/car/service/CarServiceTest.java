@@ -2,7 +2,7 @@ package com.vozimishko.backend.car.service;
 
 
 import com.vozimishko.backend.car.model.Car;
-import com.vozimishko.backend.car.model.CarApi;
+import com.vozimishko.backend.car.model.CarRequestBody;
 import com.vozimishko.backend.car.repository.CarRepository;
 import com.vozimishko.backend.security.PrincipalService;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,13 +28,13 @@ class CarServiceTest {
   private CarService carService;
 
   private Car testCar;
-  private CarApi testCarApi;
+  private CarRequestBody testCarRequestBody;
   private Long loggedInUserId;
 
   @BeforeEach
   void setUp() {
     loggedInUserId = 1L;
-    testCarApi = CarApi.builder().manufacturerName("Opel").modelName("Vectra").numberOfSeats(5).build();
+    testCarRequestBody = CarRequestBody.builder().manufacturerName("Opel").modelName("Vectra").numberOfSeats(5).build();
     testCar = Car.builder().manufacturerName("Opel").modelName("Vectra").numberOfSeats(5).userId(loggedInUserId).build();
     when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
 
@@ -44,9 +44,9 @@ class CarServiceTest {
   @Test
   void shouldAddCarToRepository() {
     when(carRepository.save(testCar)).thenReturn(testCar);
-    when(carMapper.transformToDbModel(testCarApi, loggedInUserId)).thenReturn(testCar);
+    when(carMapper.transformToDbModel(testCarRequestBody, loggedInUserId)).thenReturn(testCar);
 
-    Car result = carService.addCar(testCarApi);
+    Car result = carService.addCar(testCarRequestBody);
     assertThat(result).isEqualTo(testCar);
   }
 

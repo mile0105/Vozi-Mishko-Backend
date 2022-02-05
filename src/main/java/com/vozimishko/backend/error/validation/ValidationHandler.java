@@ -1,5 +1,7 @@
 package com.vozimishko.backend.error.validation;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,8 @@ import java.util.Map;
 @ControllerAdvice
 public class ValidationHandler {
 
+  private final Logger logger = LoggerFactory.getLogger(ValidationHandler.class);
+
   @ExceptionHandler(value = MethodArgumentNotValidException.class)
   public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
     Map<String, String> errors = new HashMap<>();
@@ -25,6 +29,10 @@ public class ValidationHandler {
       String errorMessage = error.getDefaultMessage();
       errors.put(fieldName, errorMessage);
     });
+
+    if (!errors.isEmpty()) {
+      logger.info("Validation failed for: {}, errors: {}", ex.getObjectName(), errors);
+    }
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
   }

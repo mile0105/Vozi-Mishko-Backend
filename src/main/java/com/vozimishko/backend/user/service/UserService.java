@@ -2,16 +2,20 @@ package com.vozimishko.backend.user.service;
 
 import com.vozimishko.backend.error.exceptions.BadRequestException;
 import com.vozimishko.backend.error.exceptions.InternalServerErrorException;
+import com.vozimishko.backend.error.exceptions.UnauthorizedException;
 import com.vozimishko.backend.error.model.ErrorMessage;
 import com.vozimishko.backend.security.PrincipalService;
 import com.vozimishko.backend.security.jwt.CustomJwtToken;
 import com.vozimishko.backend.security.jwt.JwtUtils;
 import com.vozimishko.backend.user.model.User;
-import com.vozimishko.backend.user.model.UserApi;
+import com.vozimishko.backend.user.model.RegisterRequestBody;
 import com.vozimishko.backend.user.model.UserDetails;
 import com.vozimishko.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -25,23 +29,34 @@ import java.util.stream.StreamSupport;
 @RequiredArgsConstructor
 public class UserService {
 
+  private final Logger logger = LoggerFactory.getLogger(UserService.class);
+
   private final UserRepository userRepository;
   private final UserMapper userMapper;
   private final AuthenticationManager authenticationManager;
   private final PrincipalService principalService;
   private final JwtUtils jwtUtils;
 
-  public void register(UserApi userApi) {
-    checkIfUserWithEmailExists(userApi.getEmail());
-    checkIfUserWithPhoneNumberExists(userApi.getPhoneNumber());
+  public void register(RegisterRequestBody registerRequestBody) {
+    checkIfUserWithEmailExists(registerRequestBody.getEmail());
+    checkIfUserWithPhoneNumberExists(registerRequestBody.getPhoneNumber());
 
-    User user = userMapper.transformToDbModel(userApi);
+    User user = userMapper.transformToDbModel(registerRequestBody);
+    logger.info("Registering user with email: {}", registerRequestBody.getEmail());
     userRepository.save(user);
   }
 
   public CustomJwtToken login(String email, String password) {
-    Authentication authentication = authenticationManager.authenticate(
-      new UsernamePasswordAuthenticationToken(email, password));
+    Authentication authentication;
+    try {
+
+      authentication = authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(email, password));
+    } catch (BadCredentialsException ex) {
+      logger.info("Authentication failed for email: {}" , email);
+      //todo next iteration: retry logic
+      throw new UnauthorizedException(ErrorMessage.INVALID_CREDENTIALS);
+    }
 
     Long userId = userRepository.findByEmail(email).map(User::getId).orElse(null);
 
@@ -54,7 +69,7 @@ public class UserService {
       .build();
   }
 
-  public UserApi getLoggedInUserData() {
+  public RegisterRequestBody getLoggedInUserData() {
     Long loggedInUserId = principalService.getLoggedInUserId();
 
     return userRepository.findById(loggedInUserId)

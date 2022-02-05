@@ -12,7 +12,7 @@ import javax.validation.constraints.NotBlank;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserApi {
+public class RegisterRequestBody {
 
   //todo add custom validator for phone number - https://www.baeldung.com/spring-mvc-custom-validator
 

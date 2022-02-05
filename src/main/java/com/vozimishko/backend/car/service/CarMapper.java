@@ -1,18 +1,18 @@
 package com.vozimishko.backend.car.service;
 
 import com.vozimishko.backend.car.model.Car;
-import com.vozimishko.backend.car.model.CarApi;
+import com.vozimishko.backend.car.model.CarRequestBody;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CarMapper {
 
-  public Car transformToDbModel(CarApi carApi, Long loggedInUserId) {
+  public Car transformToDbModel(CarRequestBody carRequestBody, Long loggedInUserId) {
 
     return Car.builder()
-      .manufacturerName(carApi.getManufacturerName())
-      .modelName(carApi.getModelName())
-      .numberOfSeats(carApi.getNumberOfSeats())
+      .manufacturerName(carRequestBody.getManufacturerName())
+      .modelName(carRequestBody.getModelName())
+      .numberOfSeats(carRequestBody.getNumberOfSeats())
       .userId(loggedInUserId)
       .build();
   }

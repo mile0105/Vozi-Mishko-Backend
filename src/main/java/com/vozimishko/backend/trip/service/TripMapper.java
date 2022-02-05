@@ -1,7 +1,7 @@
 package com.vozimishko.backend.trip.service;
 
 import com.vozimishko.backend.trip.model.Trip;
-import com.vozimishko.backend.trip.model.TripApi;
+import com.vozimishko.backend.trip.model.TripRequestBody;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -11,16 +11,16 @@ import java.util.ArrayList;
 @Component
 public class TripMapper {
 
-  public Trip mapToDbModelForAddition(TripApi tripApi, Long driverId) {
+  public Trip mapToDbModelForAddition(TripRequestBody tripRequestBody, Long driverId) {
 
     LocalDateTime localDateTime = LocalDateTime
-      .parse(tripApi.getTimeOfDeparture(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+      .parse(tripRequestBody.getTimeOfDeparture(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
     return Trip.builder()
-      .startCityId(tripApi.getStartCityId())
-      .endCityId(tripApi.getEndCityId())
+      .startCityId(tripRequestBody.getStartCityId())
+      .endCityId(tripRequestBody.getEndCityId())
       .timeOfDeparture(localDateTime)
-      .carId(tripApi.getCarId())
+      .carId(tripRequestBody.getCarId())
       .driverId(driverId)
       .passengerIds(new ArrayList<>())
       .build();

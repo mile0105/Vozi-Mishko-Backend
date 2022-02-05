@@ -9,7 +9,7 @@ import com.vozimishko.backend.error.exceptions.UnauthorizedException;
 import com.vozimishko.backend.error.model.ErrorMessage;
 import com.vozimishko.backend.security.PrincipalService;
 import com.vozimishko.backend.trip.model.Trip;
-import com.vozimishko.backend.trip.model.TripApi;
+import com.vozimishko.backend.trip.model.TripRequestBody;
 import com.vozimishko.backend.trip.repository.TripRepository;
 import com.vozimishko.backend.user.model.UserDetails;
 import com.vozimishko.backend.user.service.UserService;
@@ -70,16 +70,16 @@ class TripServiceTest {
   @Test
   void shouldTestAddingTripSuccessfully() {
     Long loggedInUserId = 1L;
-    TripApi tripApi = TripApi.builder().startCityId(1L).endCityId(2L).carId(1L).build();
+    TripRequestBody tripRequestBody = TripRequestBody.builder().startCityId(1L).endCityId(2L).carId(1L).build();
     Trip trip = Trip.builder().build();
     Car car = Car.builder().id(1L).build();
     Trip savedTrip = Trip.builder().driverId(loggedInUserId).build();
     when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
-    when(mapper.mapToDbModelForAddition(tripApi, loggedInUserId)).thenReturn(trip);
+    when(mapper.mapToDbModelForAddition(tripRequestBody, loggedInUserId)).thenReturn(trip);
     when(tripRepository.save(trip)).thenReturn(savedTrip);
     when(carService.getLoggedInUserCars()).thenReturn(Collections.singletonList(car));
 
-    Trip result = tripService.addTrip(tripApi);
+    Trip result = tripService.addTrip(tripRequestBody);
 
     assertThat(result).isEqualTo(savedTrip);
   }
@@ -87,11 +87,11 @@ class TripServiceTest {
   @Test
   void shouldThrowBadRequestExceptionIfStartCityCannotBeFound() {
     Long loggedInUserId = 1L;
-    TripApi tripApi = TripApi.builder().startCityId(1L).build();
+    TripRequestBody tripRequestBody = TripRequestBody.builder().startCityId(1L).build();
     when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
     when(cityService.findByIdOrThrow(1L)).thenThrow(new BadRequestException(ErrorMessage.CITY_NOT_FOUND));
 
-    BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.addTrip(tripApi));
+    BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.addTrip(tripRequestBody));
 
     assertEquals(ErrorMessage.CITY_NOT_FOUND, exception.getErrorMessage());
   }
@@ -99,12 +99,12 @@ class TripServiceTest {
   @Test
   void shouldThrowBadRequestExceptionIfEndCityCannotBeFound() {
     Long loggedInUserId = 1L;
-    TripApi tripApi = TripApi.builder().startCityId(1L).endCityId(2L).build();
+    TripRequestBody tripRequestBody = TripRequestBody.builder().startCityId(1L).endCityId(2L).build();
     when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
     when(cityService.findByIdOrThrow(1L)).thenReturn(new City());
     when(cityService.findByIdOrThrow(2L)).thenThrow(new BadRequestException(ErrorMessage.CITY_NOT_FOUND));
 
-    BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.addTrip(tripApi));
+    BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.addTrip(tripRequestBody));
 
     assertEquals(ErrorMessage.CITY_NOT_FOUND, exception.getErrorMessage());
   }
@@ -112,10 +112,10 @@ class TripServiceTest {
   @Test
   void shouldThrowBadRequestExceptionIfStartAndCitiesAreTheSame() {
     Long loggedInUserId = 1L;
-    TripApi tripApi = TripApi.builder().startCityId(1L).endCityId(1L).build();
+    TripRequestBody tripRequestBody = TripRequestBody.builder().startCityId(1L).endCityId(1L).build();
     when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
 
-    BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.addTrip(tripApi));
+    BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.addTrip(tripRequestBody));
 
     assertEquals(ErrorMessage.TRIP_SAME_CITIES, exception.getErrorMessage());
   }
@@ -123,12 +123,12 @@ class TripServiceTest {
   @Test
   void shouldThrowBadRequestExceptionIfCarIsNotAvailable() {
     Long loggedInUserId = 1L;
-    TripApi tripApi = TripApi.builder().startCityId(1L).endCityId(2L).carId(1L).build();
+    TripRequestBody tripRequestBody = TripRequestBody.builder().startCityId(1L).endCityId(2L).carId(1L).build();
     Car car = Car.builder().id(2L).build();
     when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
     when(carService.getLoggedInUserCars()).thenReturn(Collections.singletonList(car));
 
-    BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.addTrip(tripApi));
+    BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.addTrip(tripRequestBody));
 
     assertEquals(ErrorMessage.CAR_UNAVAILABLE, exception.getErrorMessage());
   }

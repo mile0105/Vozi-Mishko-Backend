@@ -1,7 +1,7 @@
 package com.vozimishko.backend.car;
 
 import com.vozimishko.backend.car.model.Car;
-import com.vozimishko.backend.car.model.CarApi;
+import com.vozimishko.backend.car.model.CarRequestBody;
 import com.vozimishko.backend.car.service.CarService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +17,8 @@ public class CarController {
   private final CarService carService;
 
   @PostMapping("")
-  public ResponseEntity<Car> addCar(@RequestBody CarApi carApi) {
-    Car resultCar = carService.addCar(carApi);
+  public ResponseEntity<Car> addCar(@RequestBody CarRequestBody carRequestBody) {
+    Car resultCar = carService.addCar(carRequestBody);
     return ResponseEntity.ok(resultCar);
   }
 

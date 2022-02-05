@@ -13,7 +13,7 @@ import javax.validation.constraints.Size;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CarApi {
+public class CarRequestBody {
 
   @NotBlank(message = "Manufacturer name must not be empty")
   private String manufacturerName;

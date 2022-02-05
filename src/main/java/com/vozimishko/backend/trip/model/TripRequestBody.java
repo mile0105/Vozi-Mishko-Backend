@@ -13,7 +13,7 @@ import javax.validation.constraints.NotEmpty;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TripApi {
+public class TripRequestBody {
 
   @NotEmpty(message = "Please choose a starting city for your trip")
   private Long startCityId;

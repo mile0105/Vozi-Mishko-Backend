@@ -5,7 +5,7 @@ import com.vozimishko.backend.security.PrincipalService;
 import com.vozimishko.backend.security.jwt.CustomJwtToken;
 import com.vozimishko.backend.security.jwt.JwtUtils;
 import com.vozimishko.backend.user.model.User;
-import com.vozimishko.backend.user.model.UserApi;
+import com.vozimishko.backend.user.model.RegisterRequestBody;
 import com.vozimishko.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,7 @@ class UserServiceTest {
   private Authentication authentication;
   private UserService userService;
 
-  private UserApi testUserApi;
+  private RegisterRequestBody testRegisterRequestBody;
   private User testUser;
   private String testAccessToken;
   private String testRefreshToken;
@@ -49,7 +49,7 @@ class UserServiceTest {
 
     userService = new UserService(userRepository, userMapper, authenticationManager, principalService, jwtUtils);
 
-    testUserApi = UserApi.builder().email("email").phoneNumber("123-456").build();
+    testRegisterRequestBody = RegisterRequestBody.builder().email("email").phoneNumber("123-456").build();
     testUser = User.builder().id(1L).email("email").phoneNumber("123-456").build();
     testAccessToken = "access-token";
     testRefreshToken = "refresh-token";
@@ -58,11 +58,11 @@ class UserServiceTest {
   @Test
   void shouldRegisterAUser() {
 
-    when(userRepository.findByEmail(testUserApi.getEmail())).thenReturn(Optional.empty());
-    when(userRepository.findByPhoneNumber(testUserApi.getPhoneNumber())).thenReturn(Optional.empty());
-    when(userMapper.transformToDbModel(testUserApi)).thenReturn(testUser);
+    when(userRepository.findByEmail(testRegisterRequestBody.getEmail())).thenReturn(Optional.empty());
+    when(userRepository.findByPhoneNumber(testRegisterRequestBody.getPhoneNumber())).thenReturn(Optional.empty());
+    when(userMapper.transformToDbModel(testRegisterRequestBody)).thenReturn(testUser);
 
-    userService.register(testUserApi);
+    userService.register(testRegisterRequestBody);
 
     verify(userRepository).save(testUser);
   }
@@ -70,16 +70,16 @@ class UserServiceTest {
 
   @Test
   void shouldThrowExceptionIfUserWithEmailExists() {
-    when(userRepository.findByEmail(testUserApi.getEmail())).thenReturn(Optional.of(testUser));
+    when(userRepository.findByEmail(testRegisterRequestBody.getEmail())).thenReturn(Optional.of(testUser));
 
-    assertThrows(BadRequestException.class, () -> userService.register(testUserApi),"User already exists");
+    assertThrows(BadRequestException.class, () -> userService.register(testRegisterRequestBody),"User already exists");
   }
 
   @Test
   void shouldThrowExceptionIfUserWithPhoneNumberExists() {
-    when(userRepository.findByPhoneNumber(testUserApi.getPhoneNumber())).thenReturn(Optional.of(testUser));
+    when(userRepository.findByPhoneNumber(testRegisterRequestBody.getPhoneNumber())).thenReturn(Optional.of(testUser));
 
-    assertThrows(BadRequestException.class, () -> userService.register(testUserApi),"User already exists");
+    assertThrows(BadRequestException.class, () -> userService.register(testRegisterRequestBody),"User already exists");
   }
 
   @Test
@@ -107,10 +107,10 @@ class UserServiceTest {
     Long userId = testUser.getId();
     when(principalService.getLoggedInUserId()).thenReturn(userId);
     when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-    when(userMapper.transformFromDbModel(testUser)).thenReturn(testUserApi);
+    when(userMapper.transformFromDbModel(testUser)).thenReturn(testRegisterRequestBody);
 
-    UserApi result = userService.getLoggedInUserData();
+    RegisterRequestBody result = userService.getLoggedInUserData();
 
-    assertThat(result).isEqualTo(testUserApi);
+    assertThat(result).isEqualTo(testRegisterRequestBody);
   }
 }

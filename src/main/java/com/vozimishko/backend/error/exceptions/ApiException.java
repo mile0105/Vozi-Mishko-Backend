@@ -11,6 +11,10 @@ public abstract class ApiException extends RuntimeException {
 
   public abstract ErrorMessage getErrorMessage();
 
+  public String getMessageForLogging() {
+    return getErrorMessage().getFromLanguage(RequestLanguage.ENGLISH);
+  }
+
   public String getMessage() {
     RequestLanguage requestLanguage = RequestUtils.getRequestLanguage();
     return getErrorMessage().getFromLanguage(requestLanguage);

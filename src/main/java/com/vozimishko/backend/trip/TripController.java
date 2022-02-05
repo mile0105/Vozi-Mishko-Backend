@@ -3,7 +3,7 @@ package com.vozimishko.backend.trip;
 import com.vozimishko.backend.error.exceptions.BadRequestException;
 import com.vozimishko.backend.error.model.ErrorMessage;
 import com.vozimishko.backend.trip.model.Trip;
-import com.vozimishko.backend.trip.model.TripApi;
+import com.vozimishko.backend.trip.model.TripRequestBody;
 import com.vozimishko.backend.trip.service.TripService;
 import com.vozimishko.backend.user.model.UserDetails;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +23,8 @@ public class TripController {
   private final TripService tripService;
 
   @PostMapping
-  public ResponseEntity<Trip> addTrip(@RequestBody TripApi tripApi) {
-    Trip result = tripService.addTrip(tripApi);
+  public ResponseEntity<Trip> addTrip(@RequestBody TripRequestBody tripRequestBody) {
+    Trip result = tripService.addTrip(tripRequestBody);
     return ResponseEntity.ok(result);
   }
 

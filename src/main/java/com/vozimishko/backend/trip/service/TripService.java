@@ -9,7 +9,7 @@ import com.vozimishko.backend.error.exceptions.UnauthorizedException;
 import com.vozimishko.backend.error.model.ErrorMessage;
 import com.vozimishko.backend.security.PrincipalService;
 import com.vozimishko.backend.trip.model.Trip;
-import com.vozimishko.backend.trip.model.TripApi;
+import com.vozimishko.backend.trip.model.TripRequestBody;
 import com.vozimishko.backend.trip.repository.TripRepository;
 import com.vozimishko.backend.user.model.UserDetails;
 import com.vozimishko.backend.user.service.UserService;
@@ -33,11 +33,11 @@ public class TripService {
   private final CityService cityService;
   private final UserService userService;
 
-  public Trip addTrip(TripApi tripApi) {
+  public Trip addTrip(TripRequestBody tripRequestBody) {
     Long loggedInUserId = principalService.getLoggedInUserId();
 
-    validateTrip(tripApi);
-    Trip mappedTrip = mapper.mapToDbModelForAddition(tripApi, loggedInUserId);
+    validateTrip(tripRequestBody);
+    Trip mappedTrip = mapper.mapToDbModelForAddition(tripRequestBody, loggedInUserId);
 
     return tripRepository.save(mappedTrip);
   }
@@ -128,19 +128,19 @@ public class TripService {
     return userDetails.get(0);
   }
 
-  private void validateTrip(TripApi tripApi) {
+  private void validateTrip(TripRequestBody tripRequestBody) {
 
     //if we have a city, it's already valid
-    cityService.findByIdOrThrow(tripApi.getStartCityId());
-    cityService.findByIdOrThrow(tripApi.getEndCityId());
+    cityService.findByIdOrThrow(tripRequestBody.getStartCityId());
+    cityService.findByIdOrThrow(tripRequestBody.getEndCityId());
 
-    if (Objects.equals(tripApi.getEndCityId(), tripApi.getStartCityId())) {
+    if (Objects.equals(tripRequestBody.getEndCityId(), tripRequestBody.getStartCityId())) {
       throw new BadRequestException(ErrorMessage.TRIP_SAME_CITIES);
     }
 
     Set<Long> loggedInUserCarIds = carService.getLoggedInUserCars().stream().map(Car::getId).collect(Collectors.toSet());
 
-    if (!loggedInUserCarIds.contains(tripApi.getCarId())) {
+    if (!loggedInUserCarIds.contains(tripRequestBody.getCarId())) {
       throw new BadRequestException(ErrorMessage.CAR_UNAVAILABLE);
     }
   }

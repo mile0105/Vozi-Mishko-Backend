@@ -2,7 +2,7 @@ package com.vozimishko.backend.user.service;
 
 import com.vozimishko.backend.user.model.Role;
 import com.vozimishko.backend.user.model.User;
-import com.vozimishko.backend.user.model.UserApi;
+import com.vozimishko.backend.user.model.RegisterRequestBody;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +34,7 @@ class UserMapperTest {
     String testPassword = "password";
     String encodedPassword = "3nc0d3dP@$$w0rD";
 
-    UserApi testUserApi = UserApi.builder()
+    RegisterRequestBody testRegisterRequestBody = RegisterRequestBody.builder()
       .email("email")
       .password(testPassword)
       .firstName("Vozi")
@@ -44,12 +44,12 @@ class UserMapperTest {
 
     when(passwordEncoder.encode(testPassword)).thenReturn(encodedPassword);
 
-    User result = userMapper.transformToDbModel(testUserApi);
+    User result = userMapper.transformToDbModel(testRegisterRequestBody);
 
-    assertThat(result.getEmail()).isEqualTo(testUserApi.getEmail());
-    assertThat(result.getFirstName()).isEqualTo(testUserApi.getFirstName());
-    assertThat(result.getLastName()).isEqualTo(testUserApi.getLastName());
-    assertThat(result.getPhoneNumber()).isEqualTo(testUserApi.getPhoneNumber());
+    assertThat(result.getEmail()).isEqualTo(testRegisterRequestBody.getEmail());
+    assertThat(result.getFirstName()).isEqualTo(testRegisterRequestBody.getFirstName());
+    assertThat(result.getLastName()).isEqualTo(testRegisterRequestBody.getLastName());
+    assertThat(result.getPhoneNumber()).isEqualTo(testRegisterRequestBody.getPhoneNumber());
     assertThat(result.getPassword()).isEqualTo(encodedPassword);
     assertThat(result.getRole()).isEqualTo(Role.NORMAL_USER.getName());
   }
@@ -67,7 +67,7 @@ class UserMapperTest {
       .role(Role.NORMAL_USER.getName())
       .build();
 
-    UserApi result = userMapper.transformFromDbModel(user);
+    RegisterRequestBody result = userMapper.transformFromDbModel(user);
 
     assertThat(result.getEmail()).isEqualTo(user.getEmail());
     assertThat(result.getPhoneNumber()).isEqualTo(user.getPhoneNumber());

@@ -20,6 +20,7 @@ public enum ErrorMessage {
   USER_EXISTS_PHONE("User with phone number already exists", "Веќе има корисник со тој телефонски број", ""),
   INVALID_DATE("Invalid date, please enter the date in format YYYY-MM-DD", "Погрешен датум, ве молиме внесете го датумот во формат: ГГГГ-ММ-ДД", ""),
   SOMETHING_WENT_WRONG("Something went wrong, if this problem persists, please contact us", "Нешто не е во ред, ако продолжете да го добивате овој резултат, ве молиме контактирајте не", ""),
+  INVALID_CREDENTIALS("Invalid credentials","Погрешни креденцијали",""),
   EMPTY("","","");
 
   private final String englishVersion;

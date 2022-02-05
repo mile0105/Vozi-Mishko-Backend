@@ -1,7 +1,7 @@
 package com.vozimishko.backend.car.service;
 
 import com.vozimishko.backend.car.model.Car;
-import com.vozimishko.backend.car.model.CarApi;
+import com.vozimishko.backend.car.model.CarRequestBody;
 import com.vozimishko.backend.car.repository.CarRepository;
 import com.vozimishko.backend.error.exceptions.NotFoundException;
 import com.vozimishko.backend.error.model.ErrorMessage;
@@ -18,9 +18,9 @@ public class CarService {
   private final CarMapper carMapper;
   private final PrincipalService principalService;
 
-  public Car addCar(CarApi carApi) {
+  public Car addCar(CarRequestBody carRequestBody) {
     Long loggedInUserId = principalService.getLoggedInUserId();
-    Car carDbModel = carMapper.transformToDbModel(carApi, loggedInUserId);
+    Car carDbModel = carMapper.transformToDbModel(carRequestBody, loggedInUserId);
     return carRepository.save(carDbModel);
   }
 
