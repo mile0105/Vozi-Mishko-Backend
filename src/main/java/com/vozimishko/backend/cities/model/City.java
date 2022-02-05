@@ -8,7 +8,7 @@ import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.lang.NonNull;
 
 @Data
-@Table("city")
+@Table("cities")
 public class City implements Comparable<City> {
 
   @Id
