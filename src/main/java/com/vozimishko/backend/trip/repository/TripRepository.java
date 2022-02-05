@@ -11,10 +11,10 @@ import java.util.Set;
 @Repository
 public interface TripRepository extends CrudRepository<Trip, Long> {
 
-  @Query("select * from trips where start = :start and \"END\" = :end")
-  Set<Trip> getTripsByOriginAndDestination(@Param("start") String start, @Param("end") String end);
+  @Query("select * from trips where start_city_id = :start_city_id and end_city_id = :end_city_id")
+  Set<Trip> getTripsByOriginAndDestination(@Param("start_city_id") Long startCityId, @Param("end_city_id") Long endCityId);
 
-  @Query("select * from trips where driverId = :driverId")
+  @Query("select * from trips where driver_id = :driverId")
   Set<Trip> getTripsByDriverId(@Param("driverId") Long driverId);
 
   @Query("select * from trips where :passengerId = ANY(passenger_ids)")

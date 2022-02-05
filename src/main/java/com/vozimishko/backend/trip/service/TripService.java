@@ -42,15 +42,15 @@ public class TripService {
     return tripRepository.save(mappedTrip);
   }
 
-  public Set<Trip> fetchTrips(String start, String end, LocalDate date) {
+  public Set<Trip> fetchTrips(Long startCityId, Long endCityId, LocalDate date) {
 
     Set<Trip> trips = null;
 
-    if (StringUtils.hasText(start) && StringUtils.hasText(end)) {
-      trips = tripRepository.getTripsByOriginAndDestination(start.toUpperCase(), end.toUpperCase());
+    if (startCityId != null && endCityId != null) {
+      trips = tripRepository.getTripsByOriginAndDestination(startCityId, endCityId);
     }
 
-    if(!StringUtils.hasText(start) && !StringUtils.hasText(end)) {
+    if (startCityId == null && endCityId == null) {
       trips = StreamSupport.stream(tripRepository.findAll().spliterator(), false).collect(Collectors.toSet());
     }
 

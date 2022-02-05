@@ -29,10 +29,10 @@ public class TripController {
   }
 
   @GetMapping
-  public ResponseEntity<Set<Trip>> getTrips(@RequestParam(name = "start", required = false) String start,
-                                             @RequestParam(name = "end", required = false) String end,
+  public ResponseEntity<Set<Trip>> getTrips(@RequestParam(name = "startCityId", required = false) Long startCityId,
+                                             @RequestParam(name = "endCityId", required = false) Long endCityId,
                                              @RequestParam(name = "date", required = false) String dateString) {
-    Set<Trip> trips = tripService.fetchTrips(start, end, parseDate(dateString));
+    Set<Trip> trips = tripService.fetchTrips(startCityId, endCityId, parseDate(dateString));
     return ResponseEntity.ok(trips);
   }
 

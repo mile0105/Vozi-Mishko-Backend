@@ -135,15 +135,15 @@ class TripServiceTest {
 
   @Test
   void shouldTestFetchingTripsWhenDefiningStartAndEnd() {
-    String start = "start";
-    String end = "end";
+    Long start = 1L;
+    Long end = 2L;
 
     Trip earliestTrip = Trip.builder().timeOfDeparture(earlierTripTime).build();
     Trip middleTrip = Trip.builder().timeOfDeparture(middleTripTime).build();
     Trip latestTrip = Trip.builder().timeOfDeparture(laterTripTime).build();
     Set<Trip> trips = new HashSet<>(Arrays.asList(latestTrip, earliestTrip, middleTrip));
 
-    when(tripRepository.getTripsByOriginAndDestination("START", "END")).thenReturn(trips);
+    when(tripRepository.getTripsByOriginAndDestination(start, end)).thenReturn(trips);
 
     Set<Trip> result = tripService.fetchTrips(start, end, null);
 
@@ -156,15 +156,15 @@ class TripServiceTest {
 
   @Test
   void shouldTestFilteringTripsOnGivenDateWhenDefiningStartAndEnd() {
-    String start = "start";
-    String end = "end";
+    Long start = 1L;
+    Long end = 2L;
 
     Trip earliestTrip = Trip.builder().timeOfDeparture(earlierTripTime).build();
     Trip middleTrip = Trip.builder().timeOfDeparture(middleTripTime).build();
     Trip latestTrip = Trip.builder().timeOfDeparture(laterTripTime).build();
     Set<Trip> trips = new HashSet<>(Arrays.asList(latestTrip, earliestTrip, middleTrip));
 
-    when(tripRepository.getTripsByOriginAndDestination("START", "END")).thenReturn(trips);
+    when(tripRepository.getTripsByOriginAndDestination(start, end)).thenReturn(trips);
 
     Set<Trip> result = tripService.fetchTrips(start, end, LocalDate.of(2021, 1, 1));
 
