@@ -1,17 +1,14 @@
 package com.vozimishko.backend.trip;
 
-import com.vozimishko.backend.error.exceptions.BadRequestException;
-import com.vozimishko.backend.error.model.ErrorMessage;
 import com.vozimishko.backend.trip.model.Trip;
 import com.vozimishko.backend.trip.model.TripRequestBody;
 import com.vozimishko.backend.trip.service.TripService;
 import com.vozimishko.backend.user.model.UserDetails;
+import com.vozimishko.backend.util.DateUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Set;
 
@@ -32,7 +29,7 @@ public class TripController {
   public ResponseEntity<Set<Trip>> getTrips(@RequestParam(name = "startCityId", required = false) Long startCityId,
                                              @RequestParam(name = "endCityId", required = false) Long endCityId,
                                              @RequestParam(name = "date", required = false) String dateString) {
-    Set<Trip> trips = tripService.fetchTrips(startCityId, endCityId, parseDate(dateString));
+    Set<Trip> trips = tripService.fetchTrips(startCityId, endCityId, DateUtils.parseDate(dateString));
     return ResponseEntity.ok(trips);
   }
 
@@ -76,18 +73,6 @@ public class TripController {
   public ResponseEntity<UserDetails> getDriverDetails(@PathVariable(name = "id") Long tripId) {
     UserDetails driverDetails = tripService.getDriverDetails(tripId);
     return ResponseEntity.ok(driverDetails);
-  }
-
-  private LocalDate parseDate(String dateString) {
-    if (dateString == null) {
-      return null;
-    }
-
-    try {
-      return LocalDate.parse(dateString);
-    } catch (DateTimeParseException ex) {
-      throw new BadRequestException(ErrorMessage.INVALID_DATE);
-    }
   }
 
 }

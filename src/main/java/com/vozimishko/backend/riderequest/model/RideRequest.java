@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Builder(toBuilder = true)
 @Table("ride_requests")
 @EqualsAndHashCode
-public class RideRequest {
+public class RideRequest implements Comparable<RideRequest> {
 
   @Id
   private Long id;
@@ -23,4 +23,9 @@ public class RideRequest {
   private Long passengerId;
   private Long tripId;
   private boolean isConfirmed;
+
+  @Override
+  public int compareTo(RideRequest other) {
+    return other.getTimeOfDeparture().isAfter(timeOfDeparture)? 1: -1;
+  }
 }

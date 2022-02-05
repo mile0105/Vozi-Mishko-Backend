@@ -40,6 +40,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class TripServiceTest {
 
+  //todo change assertthrows
   @Mock
   private TripRepository tripRepository;
   @Mock
@@ -175,7 +176,7 @@ class TripServiceTest {
   }
 
   @Test
-  void shouldTestFetchingAllTripsOnGivenDateWhen() {
+  void shouldTestFetchingAllTripsOnGivenDate() {
     Trip earliestTrip = Trip.builder().timeOfDeparture(earlierTripTime).build();
     Trip middleTrip = Trip.builder().timeOfDeparture(middleTripTime).build();
     Trip latestTrip = Trip.builder().timeOfDeparture(laterTripTime).build();

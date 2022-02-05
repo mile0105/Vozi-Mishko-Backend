@@ -15,7 +15,6 @@ import com.vozimishko.backend.user.model.UserDetails;
 import com.vozimishko.backend.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.*;

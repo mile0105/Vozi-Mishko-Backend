@@ -1,8 +1,8 @@
 package com.vozimishko.backend.user.service;
 
+import com.vozimishko.backend.user.model.RegisterRequestBody;
 import com.vozimishko.backend.user.model.Role;
 import com.vozimishko.backend.user.model.User;
-import com.vozimishko.backend.user.model.RegisterRequestBody;
 import com.vozimishko.backend.user.model.UserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
