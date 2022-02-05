@@ -16,13 +16,4 @@ public class VoziMishkoControllerAdvice {
 
     return new ResponseEntity<>(message, exception.getStatusCode());
   }
-
-//  @ExceptionHandler(value = Exception.class)
-//  public ResponseEntity<Object> onInternalException(Exception exception) {
-//
-//    exception.printStackTrace();
-//
-//    return new ResponseEntity<>(message, exception.getStatusCode());
-//    throw new InternalServerErrorException(ErrorMessage.SOMETHING_WENT_WRONG);
-//  }
 }
