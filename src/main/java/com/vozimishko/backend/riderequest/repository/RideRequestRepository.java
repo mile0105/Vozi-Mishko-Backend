@@ -13,4 +13,7 @@ public interface RideRequestRepository extends CrudRepository<RideRequest, Long>
 
   @Query("select * from ride_requests where start_city_id = :start_city_id and end_city_id = :end_city_id and is_confirmed = false")
   Set<RideRequest> getUnconfirmedRideRequestsByOriginAndDestination(@Param("start_city_id") Long startCityId, @Param("end_city_id") Long endCityId);
+
+  @Query("select count(*) from ride_requests where trip_id = :trip_id and is_confirmed = false")
+  Long getNumberOfUnconfirmedRideRequestsByTripId(@Param("trip_id") Long tripId);
 }

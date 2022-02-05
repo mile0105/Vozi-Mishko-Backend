@@ -7,6 +7,7 @@ import com.vozimishko.backend.cities.service.CityService;
 import com.vozimishko.backend.error.exceptions.BadRequestException;
 import com.vozimishko.backend.error.exceptions.UnauthorizedException;
 import com.vozimishko.backend.error.model.ErrorMessage;
+import com.vozimishko.backend.riderequest.service.RideRequestService;
 import com.vozimishko.backend.security.PrincipalService;
 import com.vozimishko.backend.trip.model.Trip;
 import com.vozimishko.backend.trip.model.TripRequestBody;
@@ -33,9 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TripServiceTest {
@@ -52,6 +51,8 @@ class TripServiceTest {
   private UserService userService;
   @Mock
   private CityService cityService;
+  @Mock
+  private RideRequestService rideRequestService;
 
   private TripService tripService;
 
@@ -64,7 +65,7 @@ class TripServiceTest {
     earlierTripTime = LocalDateTime.of(2021, 1, 1, 0, 0);
     middleTripTime = LocalDateTime.of(2021, 1, 1, 1, 0);
     laterTripTime = LocalDateTime.of(2021, 1, 2, 0, 0);
-    tripService = new TripService(tripRepository, mapper, principalService, carService, cityService, userService);
+    tripService = new TripService(tripRepository, mapper, principalService, carService, cityService, userService, rideRequestService);
   }
 
   @Test
@@ -278,6 +279,27 @@ class TripServiceTest {
     Trip trip = Trip.builder().driverId(loggedInUserId + 1).carId(carId)
       .passengerIds(Arrays.asList(10, 11, 12, 13)).build();
     when(tripRepository.findById(tripId)).thenReturn(Optional.of(trip));
+
+    Car testCar = Car.builder().numberOfSeats(5).build();
+    when(carService.findByIdOrThrow(carId)).thenReturn(testCar);
+
+    BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.subscribeToTrip(tripId));
+
+    assertEquals(ErrorMessage.TRIP_IS_FULL, exception.getErrorMessage());
+    verify(tripRepository, never()).save(any());
+  }
+
+  @Test
+  void shouldThrowExceptionIfCarIsNotFullWhenSubscribingButThereAreALotOfSubscriptions() {
+    Long tripId = 2L;
+    long loggedInUserId = 1L;
+    Long carId = 3L;
+
+    when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
+    Trip trip = Trip.builder().id(tripId).driverId(loggedInUserId + 1).carId(carId)
+      .passengerIds(Arrays.asList(10, 11)).build();
+    when(tripRepository.findById(tripId)).thenReturn(Optional.of(trip));
+    when(rideRequestService.getNumberOfUnconfirmedRideRequestsForTrip(tripId)).thenReturn(2L);
 
     Car testCar = Car.builder().numberOfSeats(5).build();
     when(carService.findByIdOrThrow(carId)).thenReturn(testCar);

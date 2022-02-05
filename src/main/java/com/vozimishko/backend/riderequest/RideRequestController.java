@@ -2,7 +2,9 @@ package com.vozimishko.backend.riderequest;
 
 import com.vozimishko.backend.riderequest.model.RideRequest;
 import com.vozimishko.backend.riderequest.model.RideRequestDto;
+import com.vozimishko.backend.riderequest.model.RideRequestSubscriptionDto;
 import com.vozimishko.backend.riderequest.service.RideRequestService;
+import com.vozimishko.backend.riderequest.service.RideRequestSubscriptionService;
 import com.vozimishko.backend.util.DateUtils;
 import com.vozimishko.backend.util.models.EmptyResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import java.util.Set;
 public class RideRequestController {
 
   private final RideRequestService rideRequestService;
+  private final RideRequestSubscriptionService rideRequestSubscriptionService;
 
   @PostMapping("")
   public ResponseEntity<EmptyResponse> addRideRequest(@Valid @RequestBody RideRequestDto rideRequest) {
@@ -30,5 +33,24 @@ public class RideRequestController {
                                                           @RequestParam(name = "date", required = false) String dateString) {
     Set<RideRequest> rideRequests = rideRequestService.getRideRequests(startCityId, endCityId, DateUtils.parseDate(dateString));
     return ResponseEntity.ok(rideRequests);
+  }
+
+  @PutMapping("/subscribe")
+  public ResponseEntity<EmptyResponse> subscribeToRideRequest(@Valid @RequestBody RideRequestSubscriptionDto rideRequestSubscriptionDto) {
+
+    rideRequestSubscriptionService.driverSubscribe(rideRequestSubscriptionDto);
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @PatchMapping("/{id}/confirm")
+  public ResponseEntity<EmptyResponse> confirmSubscriptionToRideRequest(@PathVariable(name = "id") Long rideRequestId) {
+    rideRequestSubscriptionService.confirmSubscription(rideRequestId);
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @PatchMapping("/{id}/deny")
+  public ResponseEntity<EmptyResponse> denySubscriptionToRideRequest(@PathVariable(name = "id") Long rideRequestId) {
+    rideRequestSubscriptionService.denySubscription(rideRequestId);
+    return ResponseEntity.ok(new EmptyResponse());
   }
 }

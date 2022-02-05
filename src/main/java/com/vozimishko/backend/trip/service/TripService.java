@@ -7,6 +7,7 @@ import com.vozimishko.backend.error.exceptions.BadRequestException;
 import com.vozimishko.backend.error.exceptions.NotFoundException;
 import com.vozimishko.backend.error.exceptions.UnauthorizedException;
 import com.vozimishko.backend.error.model.ErrorMessage;
+import com.vozimishko.backend.riderequest.service.RideRequestService;
 import com.vozimishko.backend.security.PrincipalService;
 import com.vozimishko.backend.trip.model.Trip;
 import com.vozimishko.backend.trip.model.TripRequestBody;
@@ -31,6 +32,7 @@ public class TripService {
   private final CarService carService;
   private final CityService cityService;
   private final UserService userService;
+  private final RideRequestService rideRequestService;
 
   public Trip addTrip(TripRequestBody tripRequestBody) {
     Long loggedInUserId = principalService.getLoggedInUserId();
@@ -144,9 +146,9 @@ public class TripService {
     }
   }
 
-  private void validateTripSeats(Trip trip) {
+  public void validateTripSeats(Trip trip) {
     Car car = carService.findByIdOrThrow(trip.getCarId());
-    if (car.getNumberOfSeats() - 1 <= trip.getPassengerIds().size()) {
+    if (car.getNumberOfSeats() - 1 <= trip.getPassengerIds().size() + rideRequestService.getNumberOfUnconfirmedRideRequestsForTrip(trip.getId())) {
       throw new BadRequestException(ErrorMessage.TRIP_IS_FULL);
     }
   }
