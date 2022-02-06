@@ -86,6 +86,7 @@ class RideRequestSubscriptionServiceTest {
     assertEquals(startCityId, savedValue.getStartCityId());
     assertEquals(endCityId, savedValue.getEndCityId());
     assertEquals(passengerId, savedValue.getPassengerId());
+    assertNotNull(savedValue.getConfirmationExpiry());
     assertFalse(savedValue.isConfirmed());
   }
 
@@ -126,6 +127,49 @@ class RideRequestSubscriptionServiceTest {
     assertEquals(startCityId, savedValue.getStartCityId());
     assertEquals(endCityId, savedValue.getEndCityId());
     assertEquals(passengerId, savedValue.getPassengerId());
+    assertNotNull(savedValue.getConfirmationExpiry());
+    assertFalse(savedValue.isConfirmed());
+  }
+
+  @Test
+  void shouldSubscribeToRequestIfExistingRequestLockHasExpired() {
+    Long rideRequestId = 1L;
+    Long carId = 2L;
+    Long startCityId = 3L;
+    Long endCityId = 4L;
+    Long passengerId = 5L;
+    Long tripId = 6L;
+    LocalDateTime departureTime = LocalDateTime.of(2020, 1, 1, 0,0);
+    RideRequestSubscriptionDto rideRequestSubscriptionDto = new RideRequestSubscriptionDto();
+    rideRequestSubscriptionDto.setRideRequestId(rideRequestId);
+    rideRequestSubscriptionDto.setCarId(carId);
+    when(rideRequestRepository.findById(rideRequestId)).thenReturn(Optional.of(
+      RideRequest.builder()
+        .id(rideRequestId)
+        .startCityId(startCityId)
+        .endCityId(endCityId)
+        .timeOfDeparture(departureTime)
+        .passengerId(passengerId)
+        .isConfirmed(false)
+        .tripId(7L)
+        .confirmationExpiry(LocalDateTime.MIN)
+        .build()
+    ));
+    when(carService.getLoggedInUserCars()).thenReturn(Collections.singletonList(Car.builder().id(carId).build()));
+    Trip newTrip = Trip.builder().id(tripId).carId(carId).startCityId(startCityId).endCityId(endCityId).driverId(1L).build();
+    when(tripService.addTrip(TripRequestBody.builder().startCityId(startCityId).carId(carId).endCityId(endCityId).timeOfDeparture(departureTime.toString()).build())).thenReturn(newTrip);
+
+    rideRequestSubscriptionService.driverSubscribe(rideRequestSubscriptionDto);
+
+    verify(rideRequestRepository).save(rideRequestArgumentCaptor.capture());
+    RideRequest savedValue = rideRequestArgumentCaptor.getValue();
+    assertEquals(tripId, savedValue.getTripId());
+    assertEquals(rideRequestId, savedValue.getId());
+    assertEquals(departureTime, savedValue.getTimeOfDeparture());
+    assertEquals(startCityId, savedValue.getStartCityId());
+    assertEquals(endCityId, savedValue.getEndCityId());
+    assertEquals(passengerId, savedValue.getPassengerId());
+    assertNotNull(savedValue.getConfirmationExpiry());
     assertFalse(savedValue.isConfirmed());
   }
 
@@ -157,10 +201,25 @@ class RideRequestSubscriptionServiceTest {
   }
 
   @Test
+  void shouldThrowExceptionIfRideRequestIsAlreadyConfirmed() {
+    Long rideRequestId = 1L;
+    Long tripId = 2L;
+    when(rideRequestRepository.findById(rideRequestId)).thenReturn(Optional.of(RideRequest.builder().tripId(1L).isConfirmed(true).build()));
+    RideRequestSubscriptionDto rideRequestSubscriptionDto = new RideRequestSubscriptionDto();
+    rideRequestSubscriptionDto.setRideRequestId(rideRequestId);
+    rideRequestSubscriptionDto.setTripId(tripId);
+
+    BadRequestException exception = assertThrows(BadRequestException.class, () -> rideRequestSubscriptionService.driverSubscribe(rideRequestSubscriptionDto));
+
+    assertEquals(ErrorMessage.RIDE_REQUEST_HAS_SUBSCRIPTION, exception.getErrorMessage());
+    verifyNoMutationOccured();
+  }
+
+  @Test
   void shouldThrowExceptionIfRideRequestAlreadyHasTrip() {
     Long rideRequestId = 1L;
     Long tripId = 2L;
-    when(rideRequestRepository.findById(rideRequestId)).thenReturn(Optional.of(RideRequest.builder().tripId(1L).build()));
+    when(rideRequestRepository.findById(rideRequestId)).thenReturn(Optional.of(RideRequest.builder().tripId(1L).confirmationExpiry(LocalDateTime.MAX).build()));
     RideRequestSubscriptionDto rideRequestSubscriptionDto = new RideRequestSubscriptionDto();
     rideRequestSubscriptionDto.setRideRequestId(rideRequestId);
     rideRequestSubscriptionDto.setTripId(tripId);

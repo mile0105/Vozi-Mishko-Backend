@@ -26,6 +26,8 @@ public enum ErrorMessage {
   RIDE_REQUEST_HAS_SUBSCRIPTION("The ride request already has subscription","Вашата барана рута веќе има барање за превоз",""),
   RIDE_REQUEST_SUBSCRIPTION_CAR_AND_TRIP_NULL("Your ride request subscription must contain a car or an existing trip",
     "Вашата понуда за бараната рута нема валиден автомобил или превоз",""),
+  RIDE_REQUEST_CANNOT_BE_CONFIRMED("The ride request can not be confirmed","Понудата за барана рута не може да се потврди" ,""),
+  RIDE_REQUEST_CANNOT_BE_DENIED("The ride request can not be denied","Понудата за барана рута не може да се одбие" ,""),
   EMPTY("","","");
 
   private final String englishVersion;

@@ -14,6 +14,7 @@ import com.vozimishko.backend.trip.service.TripService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -42,7 +43,7 @@ public class RideRequestSubscriptionService {
     validateSubscription(tripId, carId);
 
     RideRequest rideRequest = findByIdOrThrow(rideRequestSubscriptionDto.getRideRequestId());
-    if (rideRequest.getTripId() != null) {
+    if (!rideRequest.requestCanBeMade()) {
       throw new BadRequestException(ErrorMessage.RIDE_REQUEST_HAS_SUBSCRIPTION);
     }
 
@@ -58,7 +59,8 @@ public class RideRequestSubscriptionService {
 
     }
 
-    return rideRequest.toBuilder().tripId(tripId).build();
+    //todo maybe add a configuration param for the hours
+    return rideRequest.toBuilder().confirmationExpiry(LocalDateTime.now().plusHours(1)).tripId(tripId).build();
   }
 
   private RideRequest findByIdOrThrow(Long rideRequestId) {
@@ -84,7 +86,5 @@ public class RideRequestSubscriptionService {
     if (!loggedInUserCarIds.contains(carId)) {
       throw new BadRequestException(ErrorMessage.CAR_UNAVAILABLE);
     }
-
   }
-
 }

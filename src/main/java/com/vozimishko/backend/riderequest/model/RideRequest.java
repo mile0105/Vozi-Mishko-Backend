@@ -23,6 +23,7 @@ public class RideRequest implements Comparable<RideRequest> {
   private LocalDateTime timeOfDeparture;
   private Long passengerId;
   private Long tripId;
+  private LocalDateTime confirmationExpiry;
   private boolean isConfirmed;
 
   @Override
@@ -37,5 +38,20 @@ public class RideRequest implements Comparable<RideRequest> {
       .timeOfDeparture(timeOfDeparture.toString())
       .carId(carId)
       .build();
+  }
+
+  public boolean canBeConfirmedOrDenied() {
+    return !isConfirmed && tripId != null && confirmationExpiry != null && LocalDateTime.now().isBefore(confirmationExpiry);
+  }
+
+  public boolean requestCanBeMade() {
+    if (isConfirmed) {
+      return false;
+    }
+    if (tripId == null) {
+      return true;
+    }
+
+    return LocalDateTime.now().isAfter(confirmationExpiry);
   }
 }
