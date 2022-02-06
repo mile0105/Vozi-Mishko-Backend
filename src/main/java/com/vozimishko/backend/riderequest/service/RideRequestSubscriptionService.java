@@ -10,7 +10,6 @@ import com.vozimishko.backend.riderequest.model.RideRequestSubscriptionDto;
 import com.vozimishko.backend.riderequest.repository.RideRequestRepository;
 import com.vozimishko.backend.security.PrincipalService;
 import com.vozimishko.backend.trip.model.Trip;
-import com.vozimishko.backend.trip.model.TripRequestBody;
 import com.vozimishko.backend.trip.service.TripService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,33 +30,24 @@ public class RideRequestSubscriptionService {
   public void driverSubscribe(RideRequestSubscriptionDto rideRequestSubscriptionDto) {
 
     Long driverId = principalService.getLoggedInUserId();
-    RideRequest rideRequest = processTripForSubscription(rideRequestSubscriptionDto, driverId);
+    RideRequest rideRequest = processRideRequestForSubscription(rideRequestSubscriptionDto, driverId);
 
     rideRequestRepository.save(rideRequest);
   }
 
-  public void confirmSubscription(Long rideRequestId) {
-
-  }
-
-  public void denySubscription(Long rideRequestId) {
-
-  }
-
-  private RideRequest processTripForSubscription(RideRequestSubscriptionDto rideRequestSubscriptionDto, Long driverId) {
-
-    RideRequest rideRequest = findByIdOrThrow(rideRequestSubscriptionDto.getRideRequestId());
-    if (rideRequest.getTripId() != null) {
-      throw new BadRequestException(ErrorMessage.EMPTY);
-    }
+  private RideRequest processRideRequestForSubscription(RideRequestSubscriptionDto rideRequestSubscriptionDto, Long driverId) {
 
     Long tripId = rideRequestSubscriptionDto.getTripId();
     Long carId = rideRequestSubscriptionDto.getCarId();
     validateSubscription(tripId, carId);
 
+    RideRequest rideRequest = findByIdOrThrow(rideRequestSubscriptionDto.getRideRequestId());
+    if (rideRequest.getTripId() != null) {
+      throw new BadRequestException(ErrorMessage.RIDE_REQUEST_HAS_SUBSCRIPTION);
+    }
+
     if (tripId != null) {
       Trip existingTrip = tripService.findByIdOrThrow(tripId);
-      tripService.validateTripSeats(existingTrip);
       validateExistingTrip(existingTrip, driverId);
     }
 
@@ -68,12 +58,11 @@ public class RideRequestSubscriptionService {
 
     }
 
-
     return rideRequest.toBuilder().tripId(tripId).build();
   }
 
   private RideRequest findByIdOrThrow(Long rideRequestId) {
-    return rideRequestRepository.findById(rideRequestId).orElseThrow(() -> new NotFoundException(ErrorMessage.EMPTY));
+    return rideRequestRepository.findById(rideRequestId).orElseThrow(() -> new NotFoundException(ErrorMessage.RIDE_REQUEST_NOT_FOUND));
   }
 
   private void validateSubscription(Long carId, Long tripId) {

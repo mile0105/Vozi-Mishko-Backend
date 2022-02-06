@@ -4,6 +4,7 @@ import com.vozimishko.backend.riderequest.model.RideRequest;
 import com.vozimishko.backend.riderequest.model.RideRequestDto;
 import com.vozimishko.backend.riderequest.model.RideRequestSubscriptionDto;
 import com.vozimishko.backend.riderequest.service.RideRequestService;
+import com.vozimishko.backend.riderequest.service.RideRequestSubscriptionConfirmationService;
 import com.vozimishko.backend.riderequest.service.RideRequestSubscriptionService;
 import com.vozimishko.backend.util.DateUtils;
 import com.vozimishko.backend.util.models.EmptyResponse;
@@ -20,6 +21,7 @@ public class RideRequestController {
 
   private final RideRequestService rideRequestService;
   private final RideRequestSubscriptionService rideRequestSubscriptionService;
+  private final RideRequestSubscriptionConfirmationService rideRequestSubscriptionConfirmationService;
 
   @PostMapping("")
   public ResponseEntity<EmptyResponse> addRideRequest(@Valid @RequestBody RideRequestDto rideRequest) {
@@ -44,13 +46,13 @@ public class RideRequestController {
 
   @PatchMapping("/{id}/confirm")
   public ResponseEntity<EmptyResponse> confirmSubscriptionToRideRequest(@PathVariable(name = "id") Long rideRequestId) {
-    rideRequestSubscriptionService.confirmSubscription(rideRequestId);
+    rideRequestSubscriptionConfirmationService.confirmSubscription(rideRequestId);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
   @PatchMapping("/{id}/deny")
   public ResponseEntity<EmptyResponse> denySubscriptionToRideRequest(@PathVariable(name = "id") Long rideRequestId) {
-    rideRequestSubscriptionService.denySubscription(rideRequestId);
+    rideRequestSubscriptionConfirmationService.denySubscription(rideRequestId);
     return ResponseEntity.ok(new EmptyResponse());
   }
 }
