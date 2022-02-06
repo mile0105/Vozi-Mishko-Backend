@@ -15,7 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.Set;
 
-@RestController(value = "/api/v1/riderequests")
+@RestController
+@RequestMapping("/api/v1/riderequests")
 @RequiredArgsConstructor
 public class RideRequestController {
 
