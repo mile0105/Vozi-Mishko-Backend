@@ -38,6 +38,12 @@ public class RideRequestController {
     return ResponseEntity.ok(rideRequests);
   }
 
+  @GetMapping("{id}")
+  public ResponseEntity<RideRequest> getRideRequestById(@PathVariable(name = "id") Long rideRequestId) {
+    RideRequest rideRequest = rideRequestService.findByIdOrThrow(rideRequestId);
+    return ResponseEntity.ok(rideRequest);
+  }
+
   @PutMapping("/subscribe")
   public ResponseEntity<EmptyResponse> subscribeToRideRequest(@Valid @RequestBody RideRequestSubscriptionDto rideRequestSubscriptionDto) {
 

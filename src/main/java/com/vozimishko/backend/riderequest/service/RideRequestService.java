@@ -3,6 +3,7 @@ package com.vozimishko.backend.riderequest.service;
 
 import com.vozimishko.backend.cities.service.CityService;
 import com.vozimishko.backend.error.exceptions.BadRequestException;
+import com.vozimishko.backend.error.exceptions.NotFoundException;
 import com.vozimishko.backend.error.model.ErrorMessage;
 import com.vozimishko.backend.riderequest.model.RideRequest;
 import com.vozimishko.backend.riderequest.model.RideRequestDto;
@@ -54,6 +55,10 @@ public class RideRequestService {
 
     return filterRideRequestsByDateAndSort(rideRequests, dateOfDesiredTrip);
 
+  }
+
+  public RideRequest findByIdOrThrow(Long rideRequestId) {
+    return rideRequestRepository.findById(rideRequestId).orElseThrow(() -> new NotFoundException(ErrorMessage.RIDE_REQUEST_NOT_FOUND));
   }
 
   public Long getNumberOfUnconfirmedRideRequestsForTrip(Long tripId) {
