@@ -9,6 +9,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Getter
 @Builder(toBuilder = true)
@@ -35,7 +36,7 @@ public class RideRequest implements Comparable<RideRequest> {
     return TripRequestBody.builder()
       .startCityId(startCityId)
       .endCityId(endCityId)
-      .timeOfDeparture(timeOfDeparture.toString())
+      .timeOfDeparture(timeOfDeparture.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
       .carId(carId)
       .build();
   }

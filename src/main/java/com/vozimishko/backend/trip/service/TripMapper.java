@@ -14,7 +14,7 @@ public class TripMapper {
   public Trip mapToDbModelForAddition(TripRequestBody tripRequestBody, Long driverId) {
 
     LocalDateTime localDateTime = LocalDateTime
-      .parse(tripRequestBody.getTimeOfDeparture(), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+      .parse(tripRequestBody.getTimeOfDeparture(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
     return Trip.builder()
       .startCityId(tripRequestBody.getStartCityId())

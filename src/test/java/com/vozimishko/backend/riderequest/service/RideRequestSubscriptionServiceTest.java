@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -115,7 +116,7 @@ class RideRequestSubscriptionServiceTest {
     ));
     when(carService.getLoggedInUserCars()).thenReturn(Collections.singletonList(Car.builder().id(carId).build()));
     Trip newTrip = Trip.builder().id(tripId).carId(carId).startCityId(startCityId).endCityId(endCityId).driverId(1L).build();
-    when(tripService.addTrip(TripRequestBody.builder().startCityId(startCityId).carId(carId).endCityId(endCityId).timeOfDeparture(departureTime.toString()).build())).thenReturn(newTrip);
+    when(tripService.addTrip(TripRequestBody.builder().startCityId(startCityId).carId(carId).endCityId(endCityId).timeOfDeparture(departureTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).build())).thenReturn(newTrip);
 
     rideRequestSubscriptionService.driverSubscribe(rideRequestSubscriptionDto);
 
@@ -157,7 +158,7 @@ class RideRequestSubscriptionServiceTest {
     ));
     when(carService.getLoggedInUserCars()).thenReturn(Collections.singletonList(Car.builder().id(carId).build()));
     Trip newTrip = Trip.builder().id(tripId).carId(carId).startCityId(startCityId).endCityId(endCityId).driverId(1L).build();
-    when(tripService.addTrip(TripRequestBody.builder().startCityId(startCityId).carId(carId).endCityId(endCityId).timeOfDeparture(departureTime.toString()).build())).thenReturn(newTrip);
+    when(tripService.addTrip(TripRequestBody.builder().startCityId(startCityId).carId(carId).endCityId(endCityId).timeOfDeparture(departureTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).build())).thenReturn(newTrip);
 
     rideRequestSubscriptionService.driverSubscribe(rideRequestSubscriptionDto);
 
