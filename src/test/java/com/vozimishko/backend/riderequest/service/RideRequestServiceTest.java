@@ -8,7 +8,6 @@ import com.vozimishko.backend.riderequest.model.RideRequest;
 import com.vozimishko.backend.riderequest.model.RideRequestDto;
 import com.vozimishko.backend.riderequest.repository.RideRequestRepository;
 import com.vozimishko.backend.security.PrincipalService;
-import com.vozimishko.backend.trip.model.Trip;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -190,5 +189,24 @@ class RideRequestServiceTest {
     assertThat(rideRequestCopy.get(0)).isEqualTo(latestRideRequest);
     assertThat(rideRequestCopy.get(1)).isEqualTo(middleRideRequest);
     assertThat(rideRequestCopy.get(2)).isEqualTo(earliestRideRequest);
+  }
+
+  @Test
+  void shouldReturnTrueWhenPassengerIsContainedInTripInAnUnconfirmedRideRequest() {
+    when(rideRequestRepository.getPassengerIdsFromUnconfirmedRideRequestsByTripId(1L)).thenReturn(new HashSet<>(Arrays.asList(1L, 2L)));
+
+    boolean result = rideRequestService.passengerIsPartOfRideRequest(1L, 1L);
+
+    assertTrue(result);
+  }
+
+
+  @Test
+  void shouldReturnFalseWhenPassengerIsContainedInTripInAnUnconfirmedRideRequest() {
+    when(rideRequestRepository.getPassengerIdsFromUnconfirmedRideRequestsByTripId(1L)).thenReturn(new HashSet<>(Arrays.asList(1L, 2L)));
+
+    boolean result = rideRequestService.passengerIsPartOfRideRequest(1L, 4L);
+
+    assertFalse(result);
   }
 }

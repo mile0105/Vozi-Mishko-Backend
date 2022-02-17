@@ -65,6 +65,10 @@ public class RideRequestService {
     return rideRequestRepository.getNumberOfUnconfirmedRideRequestsByTripId(tripId);
   }
 
+  public boolean passengerIsPartOfRideRequest(Long tripId, Long passengerId) {
+    return rideRequestRepository.getPassengerIdsFromUnconfirmedRideRequestsByTripId(tripId).contains(passengerId);
+  }
+
   private void validateRideRequest(RideRequestDto rideRequestDto) {
     cityService.findByIdOrThrow(rideRequestDto.getStartCityId());
     cityService.findByIdOrThrow(rideRequestDto.getEndCityId());

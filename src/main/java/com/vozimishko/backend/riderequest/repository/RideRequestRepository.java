@@ -16,4 +16,8 @@ public interface RideRequestRepository extends CrudRepository<RideRequest, Long>
 
   @Query("select count(*) from ride_requests where trip_id = :trip_id and is_confirmed = false and confirmation_expiry > now()")
   Long getNumberOfUnconfirmedRideRequestsByTripId(@Param("trip_id") Long tripId);
+
+
+  @Query("select passenger_id from ride_requests where trip_id = :trip_id and is_confirmed = false and confirmation_expiry > now()")
+  Set<Long> getPassengerIdsFromUnconfirmedRideRequestsByTripId(@Param("trip_id") Long tripId);
 }
