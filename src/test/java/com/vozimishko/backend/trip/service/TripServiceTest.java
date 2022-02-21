@@ -270,6 +270,24 @@ class TripServiceTest {
   }
 
   @Test
+  void shouldThrowExceptionIfUserIsContainedWithinRequestsWhenSubscribing() {
+    Long tripId = 2L;
+    long loggedInUserId = 1L;
+    Long carId = 3L;
+
+    when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
+    Trip trip = Trip.builder().id(tripId).driverId(loggedInUserId + 1).carId(carId).passengerIds(new ArrayList<>()).build();
+    when(tripRepository.findById(tripId)).thenReturn(Optional.of(trip));
+    when(rideRequestService.passengerIsPartOfRideRequest(tripId, loggedInUserId)).thenReturn(true);
+
+    BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.subscribeToTrip(tripId));
+
+    assertEquals(ErrorMessage.TRIP_ALREADY_CONTAINS_CUSTOMER, exception.getErrorMessage());
+    verify(carService, never()).findByIdOrThrow(carId);
+    verify(tripRepository, never()).save(any());
+  }
+
+  @Test
   void shouldThrowExceptionIfCarIsFullWhenSubscribing() {
     Long tripId = 2L;
     long loggedInUserId = 1L;

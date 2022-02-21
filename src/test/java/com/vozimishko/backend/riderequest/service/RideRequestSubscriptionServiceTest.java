@@ -202,6 +202,21 @@ class RideRequestSubscriptionServiceTest {
   }
 
   @Test
+  void shouldThrowExceptionIfDriverTriesToSubscribeToHisOwnRideRequest() {
+    Long rideRequestId = 1L;
+    Long tripId = 2L;
+    when(rideRequestRepository.findById(rideRequestId)).thenReturn(Optional.of(RideRequest.builder().passengerId(1L).build()));
+    RideRequestSubscriptionDto rideRequestSubscriptionDto = new RideRequestSubscriptionDto();
+    rideRequestSubscriptionDto.setRideRequestId(rideRequestId);
+    rideRequestSubscriptionDto.setTripId(tripId);
+
+    BadRequestException exception = assertThrows(BadRequestException.class, () -> rideRequestSubscriptionService.driverSubscribe(rideRequestSubscriptionDto));
+
+    assertEquals(ErrorMessage.DRIVER_CANNOT_SUBSCRIBE, exception.getErrorMessage());
+    verifyNoMutationOccured();
+  }
+
+  @Test
   void shouldThrowExceptionIfRideRequestIsAlreadyConfirmed() {
     Long rideRequestId = 1L;
     Long tripId = 2L;

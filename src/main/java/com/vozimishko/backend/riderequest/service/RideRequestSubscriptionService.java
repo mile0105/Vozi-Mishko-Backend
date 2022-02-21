@@ -47,6 +47,10 @@ public class RideRequestSubscriptionService {
       throw new BadRequestException(ErrorMessage.RIDE_REQUEST_HAS_SUBSCRIPTION);
     }
 
+    if (Objects.equals(driverId, rideRequest.getPassengerId())) {
+      throw new BadRequestException(ErrorMessage.DRIVER_CANNOT_SUBSCRIBE);
+    }
+
     if (tripId != null) {
       Trip existingTrip = tripService.findByIdOrThrow(tripId);
       validateExistingTrip(existingTrip, driverId);
