@@ -63,12 +63,22 @@ public class TripService {
   }
 
   public Trip subscribeToTrip(Long tripId) {
+    return subscribeToTrip(tripId, false);
+  }
 
+  public Trip confirmRideRequest(Long tripId) {
+    return subscribeToTrip(tripId, true);
+  }
+
+  private Trip subscribeToTrip(Long tripId, boolean isFromRideRequest) {
     Long loggedInUserId = principalService.getLoggedInUserId();
     Trip trip = findByIdOrThrow(tripId);
-    validateDriverDoesntExist(trip, loggedInUserId);
-    validateCustomerIdDoesntExist(trip, loggedInUserId);
-    validateTripSeats(trip);
+
+    if (!isFromRideRequest) {
+      validateDriverDoesntExist(trip, loggedInUserId);
+      validateCustomerIdDoesntExist(trip, loggedInUserId);
+      validateTripSeats(trip);
+    }
 
     List<Integer> updatedPassengerIds = new ArrayList<>(trip.getPassengerIds());
     updatedPassengerIds.add(loggedInUserId.intValue());

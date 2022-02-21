@@ -22,7 +22,7 @@ public class RideRequestSubscriptionConfirmationService {
     if (!rideRequest.canBeConfirmedOrDenied()) {
       throw new BadRequestException(ErrorMessage.RIDE_REQUEST_CANNOT_BE_CONFIRMED);
     }
-    tripService.subscribeToTrip(rideRequest.getTripId());
+    tripService.confirmRideRequest(rideRequest.getTripId());
     RideRequest confirmedRequest = rideRequest.toBuilder().isConfirmed(true).build();
     rideRequestRepository.save(confirmedRequest);
   }
