@@ -170,7 +170,7 @@ public class TripService {
   }
 
   private void validateCustomerIdDoesntExist(Trip trip, Long loggedInUser) {
-    if (trip.getPassengerIds().contains(loggedInUser.intValue())) {
+    if (trip.getPassengerIds().contains(loggedInUser.intValue()) || rideRequestService.passengerIsPartOfRideRequest(trip.getId(), loggedInUser)) {
       throw new BadRequestException(ErrorMessage.TRIP_ALREADY_CONTAINS_CUSTOMER);
     }
   }
