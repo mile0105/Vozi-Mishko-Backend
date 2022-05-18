@@ -34,6 +34,8 @@ public class Trip implements Comparable<Trip> {
   private Double documentPrice;
   @Column("maximum_number_of_documents")
   private Integer maximumNumberOfDocuments;
+  @Column("maximum_capacity")
+  private Integer maximumCapacity;
 
   @Override
   public int compareTo(Trip other) {

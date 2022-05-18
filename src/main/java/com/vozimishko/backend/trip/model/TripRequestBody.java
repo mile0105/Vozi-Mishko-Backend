@@ -26,6 +26,8 @@ public class TripRequestBody {
   private Long carId;
   @NotEmpty(message = "Please enter a price for your trip")
   private Double tripPrice;
+  @NotEmpty(message = "Please enter the maximum capacity")
+  private Integer maximumCapacity;
   private Double documentPrice;
   private Integer maximumNumberOfDocuments;
 

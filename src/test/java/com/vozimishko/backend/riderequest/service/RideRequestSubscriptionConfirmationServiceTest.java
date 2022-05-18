@@ -45,7 +45,7 @@ class RideRequestSubscriptionConfirmationServiceTest {
 
     confirmationService.confirmSubscription(rideRequestId);
 
-    verify(tripService).subscribeToTrip(tripId);
+    verify(tripService).confirmRideRequest(tripId);
     verify(rideRequestRepository).save(rideRequest.toBuilder().isConfirmed(true).build());
   }
 

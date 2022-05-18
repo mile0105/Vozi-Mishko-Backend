@@ -25,6 +25,7 @@ public class TripMapper {
       .passengerIds(new ArrayList<>())
       .tripPrice(tripRequestBody.getTripPrice())
       .documentPrice(tripRequestBody.getDocumentPrice() != null ? tripRequestBody.getDocumentPrice() : 0)
+      .maximumCapacity(tripRequestBody.getMaximumCapacity())
       .maximumNumberOfDocuments(tripRequestBody.getMaximumNumberOfDocuments() != null ? tripRequestBody.getMaximumNumberOfDocuments() : 0)
       .build();
   }

@@ -71,18 +71,23 @@ class TripServiceTest {
   @Test
   void shouldTestAddingTripSuccessfully() {
     Long loggedInUserId = 1L;
-    TripRequestBody tripRequestBody = TripRequestBody.builder().startCityId(1L).endCityId(2L).carId(1L).build();
+    TripRequestBody tripRequestBody = TripRequestBody.builder().startCityId(1L).endCityId(2L).carId(1L).maximumCapacity(3).build();
     Trip trip = Trip.builder().build();
-    Car car = Car.builder().id(1L).build();
+    Car car = Car.builder().id(1L).userId(1L).numberOfSeats(5).build();
     Trip savedTrip = Trip.builder().driverId(loggedInUserId).build();
     when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
     when(mapper.mapToDbModelForAddition(tripRequestBody, loggedInUserId)).thenReturn(trip);
     when(tripRepository.save(trip)).thenReturn(savedTrip);
-    when(carService.getLoggedInUserCars()).thenReturn(Collections.singletonList(car));
+    when(carService.findByIdOrThrow(1L)).thenReturn(car);
 
-    Trip result = tripService.addTrip(tripRequestBody);
+    try {
+      Trip result = tripService.addTrip(tripRequestBody);
+      assertThat(result).isEqualTo(savedTrip);
 
-    assertThat(result).isEqualTo(savedTrip);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
   }
 
   @Test
@@ -127,13 +132,27 @@ class TripServiceTest {
   void shouldThrowBadRequestExceptionIfCarIsNotAvailable() {
     Long loggedInUserId = 1L;
     TripRequestBody tripRequestBody = TripRequestBody.builder().startCityId(1L).endCityId(2L).carId(1L).build();
-    Car car = Car.builder().id(2L).build();
+    Car car = Car.builder().id(1L).userId(3L).build();
     when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
-    when(carService.getLoggedInUserCars()).thenReturn(Collections.singletonList(car));
+    when(carService.findByIdOrThrow(1L)).thenReturn(car);
 
     BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.addTrip(tripRequestBody));
 
     assertEquals(ErrorMessage.CAR_UNAVAILABLE, exception.getErrorMessage());
+    verify(tripRepository, never()).save(any());
+  }
+
+  @Test
+  void shouldThrowBadRequestExceptionIfMaximumCapacityExceedsCarSeats() {
+    Long loggedInUserId = 1L;
+    TripRequestBody tripRequestBody = TripRequestBody.builder().startCityId(1L).endCityId(2L).carId(1L).maximumCapacity(5).build();
+    Car car = Car.builder().id(1L).userId(1L).numberOfSeats(5).build();
+    when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
+    when(carService.findByIdOrThrow(1L)).thenReturn(car);
+
+    BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.addTrip(tripRequestBody));
+
+    assertEquals(ErrorMessage.FREE_SPACES_EXCEED_CAR_CAPACITY, exception.getErrorMessage());
     verify(tripRepository, never()).save(any());
   }
 
@@ -221,11 +240,8 @@ class TripServiceTest {
     Long carId = 3L;
 
     when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
-    Trip trip = Trip.builder().driverId(loggedInUserId + 1).carId(carId).passengerIds(new ArrayList<>()).build();
+    Trip trip = Trip.builder().maximumCapacity(5).driverId(loggedInUserId + 1).carId(carId).passengerIds(new ArrayList<>()).build();
     when(tripRepository.findById(tripId)).thenReturn(Optional.of(trip));
-
-    Car testCar = Car.builder().numberOfSeats(5).build();
-    when(carService.findByIdOrThrow(carId)).thenReturn(testCar);
 
     Trip tripResult = trip.toBuilder().passengerIds(Collections.singletonList((int) loggedInUserId)).build();
 
@@ -294,12 +310,9 @@ class TripServiceTest {
     Long carId = 3L;
 
     when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
-    Trip trip = Trip.builder().driverId(loggedInUserId + 1).carId(carId)
+    Trip trip = Trip.builder().driverId(loggedInUserId + 1).maximumCapacity(4).carId(carId)
       .passengerIds(Arrays.asList(10, 11, 12, 13)).build();
     when(tripRepository.findById(tripId)).thenReturn(Optional.of(trip));
-
-    Car testCar = Car.builder().numberOfSeats(5).build();
-    when(carService.findByIdOrThrow(carId)).thenReturn(testCar);
 
     BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.subscribeToTrip(tripId));
 
@@ -314,13 +327,10 @@ class TripServiceTest {
     Long carId = 3L;
 
     when(principalService.getLoggedInUserId()).thenReturn(loggedInUserId);
-    Trip trip = Trip.builder().id(tripId).driverId(loggedInUserId + 1).carId(carId)
+    Trip trip = Trip.builder().id(tripId).maximumCapacity(2).driverId(loggedInUserId + 1).carId(carId)
       .passengerIds(Arrays.asList(10, 11)).build();
     when(tripRepository.findById(tripId)).thenReturn(Optional.of(trip));
     when(rideRequestService.getNumberOfUnconfirmedRideRequestsForTrip(tripId)).thenReturn(2L);
-
-    Car testCar = Car.builder().numberOfSeats(5).build();
-    when(carService.findByIdOrThrow(carId)).thenReturn(testCar);
 
     BadRequestException exception = assertThrows(BadRequestException.class, () -> tripService.subscribeToTrip(tripId));
 

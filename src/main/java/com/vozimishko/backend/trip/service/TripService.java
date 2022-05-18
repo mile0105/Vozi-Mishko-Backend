@@ -35,10 +35,10 @@ public class TripService {
   private final RideRequestService rideRequestService;
 
   public Trip addTrip(TripRequestBody tripRequestBody) {
-    Long loggedInUserId = principalService.getLoggedInUserId();
+    Long driverId = principalService.getLoggedInUserId();
 
-    validateTrip(tripRequestBody);
-    Trip mappedTrip = mapper.mapToDbModelForAddition(tripRequestBody, loggedInUserId);
+    validateTrip(tripRequestBody, driverId);
+    Trip mappedTrip = mapper.mapToDbModelForAddition(tripRequestBody, driverId);
 
     return tripRepository.save(mappedTrip);
   }
@@ -139,7 +139,7 @@ public class TripService {
     return userDetails.get(0);
   }
 
-  private void validateTrip(TripRequestBody tripRequestBody) {
+  private void validateTrip(TripRequestBody tripRequestBody, Long driverId) {
 
     //if we have a city, it's already valid
     cityService.findByIdOrThrow(tripRequestBody.getStartCityId());
@@ -149,16 +149,19 @@ public class TripService {
       throw new BadRequestException(ErrorMessage.TRIP_SAME_CITIES);
     }
 
-    Set<Long> loggedInUserCarIds = carService.getLoggedInUserCars().stream().map(Car::getId).collect(Collectors.toSet());
+    Car car = carService.findByIdOrThrow(tripRequestBody.getCarId());
 
-    if (!loggedInUserCarIds.contains(tripRequestBody.getCarId())) {
+    if (!Objects.equals(driverId, car.getUserId())) {
       throw new BadRequestException(ErrorMessage.CAR_UNAVAILABLE);
+    }
+
+    if (car.getNumberOfSeats() - 1 < tripRequestBody.getMaximumCapacity()) {
+      throw new BadRequestException(ErrorMessage.FREE_SPACES_EXCEED_CAR_CAPACITY);
     }
   }
 
   public void validateTripSeats(Trip trip) {
-    Car car = carService.findByIdOrThrow(trip.getCarId());
-    if (car.getNumberOfSeats() - 1 <= trip.getPassengerIds().size() + rideRequestService.getNumberOfUnconfirmedRideRequestsForTrip(trip.getId())) {
+    if (trip.getMaximumCapacity() <= trip.getPassengerIds().size() + rideRequestService.getNumberOfUnconfirmedRideRequestsForTrip(trip.getId())) {
       throw new BadRequestException(ErrorMessage.TRIP_IS_FULL);
     }
   }
