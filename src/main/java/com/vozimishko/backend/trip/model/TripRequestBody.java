@@ -24,4 +24,9 @@ public class TripRequestBody {
   private String timeOfDeparture;
   @NotEmpty(message = "Please choose a car for your trip")
   private Long carId;
+  @NotEmpty(message = "Please enter a price for your trip")
+  private Double tripPrice;
+  private Double documentPrice;
+  private Integer maximumNumberOfDocuments;
+
 }

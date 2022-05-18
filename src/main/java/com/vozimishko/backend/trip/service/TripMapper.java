@@ -23,6 +23,9 @@ public class TripMapper {
       .carId(tripRequestBody.getCarId())
       .driverId(driverId)
       .passengerIds(new ArrayList<>())
+      .tripPrice(tripRequestBody.getTripPrice())
+      .documentPrice(tripRequestBody.getDocumentPrice() != null ? tripRequestBody.getDocumentPrice() : 0)
+      .maximumNumberOfDocuments(tripRequestBody.getMaximumNumberOfDocuments() != null ? tripRequestBody.getMaximumNumberOfDocuments() : 0)
       .build();
   }
 }

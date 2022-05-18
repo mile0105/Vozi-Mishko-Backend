@@ -28,6 +28,12 @@ public class Trip implements Comparable<Trip> {
   private Long carId;
   @Column("passenger_ids")
   private List<Integer> passengerIds;
+  @Column("trip_price")
+  private Double tripPrice;
+  @Column("document_price")
+  private Double documentPrice;
+  @Column("maximum_number_of_documents")
+  private Integer maximumNumberOfDocuments;
 
   @Override
   public int compareTo(Trip other) {
