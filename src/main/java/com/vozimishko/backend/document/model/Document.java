@@ -24,5 +24,6 @@ public class Document {
   private String receiverPhoneNumber;
   @Column
   private String format;
-
+  @Column("trip_id")
+  private Long tripId;
 }
