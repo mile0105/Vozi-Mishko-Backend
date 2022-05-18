@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -31,8 +30,7 @@ public class DocumentController {
 
   @GetMapping("{id}")
   public ResponseEntity<Document> getDocumentById(@PathVariable(name = "id") Long documentId) {
-    Document document = documentService.getDocumentById(documentId);
+    Document document = documentService.getDocumentByIdOrThrow(documentId);
     return ResponseEntity.ok(document);
   }
-
 }

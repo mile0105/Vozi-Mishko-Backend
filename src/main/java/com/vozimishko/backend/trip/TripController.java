@@ -1,5 +1,7 @@
 package com.vozimishko.backend.trip;
 
+import com.vozimishko.backend.document.model.Document;
+import com.vozimishko.backend.document.service.DocumentService;
 import com.vozimishko.backend.trip.model.Trip;
 import com.vozimishko.backend.trip.model.TripRequestBody;
 import com.vozimishko.backend.trip.service.TripService;
@@ -18,6 +20,7 @@ import java.util.Set;
 public class TripController {
 
   private final TripService tripService;
+  private final DocumentService documentService;
 
   @PostMapping
   public ResponseEntity<Trip> addTrip(@RequestBody TripRequestBody tripRequestBody) {
@@ -75,4 +78,9 @@ public class TripController {
     return ResponseEntity.ok(driverDetails);
   }
 
+  @GetMapping("/{id}/documents")
+  public ResponseEntity<List<Document>> getDocumentsFromTrip(@PathVariable(name = "id") Long tripId) {
+    List<Document> documents = documentService.getDocumentsFromTrip(tripId);
+    return ResponseEntity.ok(documents);
+  }
 }

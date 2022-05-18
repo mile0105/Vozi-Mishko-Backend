@@ -29,6 +29,8 @@ public enum ErrorMessage {
   RIDE_REQUEST_CANNOT_BE_CONFIRMED("The ride request can not be confirmed","Понудата за барана рута не може да се потврди" ,""),
   RIDE_REQUEST_CANNOT_BE_DENIED("The ride request can not be denied","Понудата за барана рута не може да се одбие" ,""),
   FREE_SPACES_EXCEED_CAR_CAPACITY("Free spaces exceed car capacity","Слободните места се повеќе од капацитетот на автомобилот" ,""),
+  DOCUMENT_NOT_FOUND("The document is not found", "Документот не е пронајден",""),
+  DOCUMENT_UNAVAILABLE("The document is not available", "Документот не е достапен", ""),
   EMPTY("","","");
 
   private final String englishVersion;
