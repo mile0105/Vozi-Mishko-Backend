@@ -37,8 +37,6 @@ class UserMapperTest {
     RegisterRequestBody testRegisterRequestBody = RegisterRequestBody.builder()
       .email("email")
       .password(testPassword)
-      .firstName("Vozi")
-      .lastName("Mishko")
       .phoneNumber("123-456")
       .build();
 
@@ -47,8 +45,6 @@ class UserMapperTest {
     User result = userMapper.transformToDbModel(testRegisterRequestBody);
 
     assertThat(result.getEmail()).isEqualTo(testRegisterRequestBody.getEmail());
-    assertThat(result.getFirstName()).isEqualTo(testRegisterRequestBody.getFirstName());
-    assertThat(result.getLastName()).isEqualTo(testRegisterRequestBody.getLastName());
     assertThat(result.getPhoneNumber()).isEqualTo(testRegisterRequestBody.getPhoneNumber());
     assertThat(result.getPassword()).isEqualTo(encodedPassword);
     assertThat(result.getRole()).isEqualTo(Role.NORMAL_USER.getName());
@@ -71,8 +67,6 @@ class UserMapperTest {
 
     assertThat(result.getEmail()).isEqualTo(user.getEmail());
     assertThat(result.getPhoneNumber()).isEqualTo(user.getPhoneNumber());
-    assertThat(result.getFirstName()).isEqualTo(user.getFirstName());
-    assertThat(result.getLastName()).isEqualTo(user.getLastName());
     assertThat(result.getPassword()).isNull();
     assertThat(result.getId()).isEqualTo(user.getId());
   }

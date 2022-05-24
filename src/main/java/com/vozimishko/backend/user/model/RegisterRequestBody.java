@@ -24,8 +24,4 @@ public class RegisterRequestBody {
   private String password;
   @NotBlank(message = "Phone number is mandatory")
   private String phoneNumber;
-  @NotBlank(message = "First name is mandatory")
-  private String firstName;
-  @NotBlank(message = "Last name is mandatory")
-  private String lastName;
 }

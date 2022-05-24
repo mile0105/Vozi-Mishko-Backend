@@ -19,8 +19,6 @@ public class UserMapper {
     return User.builder()
       .email(registerRequestBody.getEmail())
       .password(passwordEncoder.encode(registerRequestBody.getPassword()))
-      .firstName(registerRequestBody.getFirstName())
-      .lastName(registerRequestBody.getLastName())
       .phoneNumber(registerRequestBody.getPhoneNumber())
       .role(Role.NORMAL_USER.getName())
       .build();
@@ -30,8 +28,6 @@ public class UserMapper {
     return RegisterRequestBody.builder()
       .email(user.getEmail())
       .phoneNumber(user.getPhoneNumber())
-      .firstName(user.getFirstName())
-      .lastName(user.getLastName())
       .id(user.getId())
       .build();
   }
