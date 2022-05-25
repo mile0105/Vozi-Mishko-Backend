@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -24,4 +25,14 @@ public class RegisterRequestBody {
   private String password;
   @NotBlank(message = "Phone number is mandatory")
   private String phoneNumber;
+
+  public User transformToDbModel(PasswordEncoder passwordEncoder) {
+
+    return User.builder()
+      .email(email)
+      .password(passwordEncoder.encode(password))
+      .phoneNumber(phoneNumber)
+      .role(Role.NORMAL_USER.getName())
+      .build();
+  }
 }

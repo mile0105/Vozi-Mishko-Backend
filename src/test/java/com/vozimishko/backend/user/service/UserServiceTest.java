@@ -4,21 +4,27 @@ import com.vozimishko.backend.error.exceptions.BadRequestException;
 import com.vozimishko.backend.security.PrincipalService;
 import com.vozimishko.backend.security.jwt.CustomJwtToken;
 import com.vozimishko.backend.security.jwt.JwtUtils;
+import com.vozimishko.backend.user.model.Role;
 import com.vozimishko.backend.user.model.User;
 import com.vozimishko.backend.user.model.RegisterRequestBody;
+import com.vozimishko.backend.user.model.UserData;
 import com.vozimishko.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,7 +34,7 @@ class UserServiceTest {
   @Mock
   private UserRepository userRepository;
   @Mock
-  private UserMapper userMapper;
+  private PasswordEncoder passwordEncoder;
   @Mock
   private AuthenticationManager authenticationManager;
   @Mock
@@ -37,9 +43,13 @@ class UserServiceTest {
   private JwtUtils jwtUtils;
   @Mock
   private Authentication authentication;
+  @Captor
+  private ArgumentCaptor<User> userArgumentCaptor;
   private UserService userService;
 
   private RegisterRequestBody testRegisterRequestBody;
+
+  private UserData testUserData;
   private User testUser;
   private String testAccessToken;
   private String testRefreshToken;
@@ -47,10 +57,11 @@ class UserServiceTest {
   @BeforeEach
   void setUp() {
 
-    userService = new UserService(userRepository, userMapper, authenticationManager, principalService, jwtUtils);
+    userService = new UserService(userRepository, authenticationManager, principalService, jwtUtils, passwordEncoder);
 
-    testRegisterRequestBody = RegisterRequestBody.builder().email("email").phoneNumber("123-456").build();
-    testUser = User.builder().id(1L).email("email").phoneNumber("123-456").build();
+    testRegisterRequestBody = RegisterRequestBody.builder().email("email").password("1234").phoneNumber("123-456").build();
+    testUserData = UserData.builder().id(1L).email("email").phoneNumber("123-456").build();
+    testUser = User.builder().id(1L).email("email").role(Role.NORMAL_USER.getName()).phoneNumber("123-456").password("3nc0d3d").build();
     testAccessToken = "access-token";
     testRefreshToken = "refresh-token";
   }
@@ -60,11 +71,13 @@ class UserServiceTest {
 
     when(userRepository.findByEmail(testRegisterRequestBody.getEmail())).thenReturn(Optional.empty());
     when(userRepository.findByPhoneNumber(testRegisterRequestBody.getPhoneNumber())).thenReturn(Optional.empty());
-    when(userMapper.transformToDbModel(testRegisterRequestBody)).thenReturn(testUser);
+    when(passwordEncoder.encode("1234")).thenReturn("3nc0d3d");
 
     userService.register(testRegisterRequestBody);
 
-    verify(userRepository).save(testUser);
+    verify(userRepository).save(userArgumentCaptor.capture());
+
+    assertEquals(testUser.toBuilder().id(null).build(), userArgumentCaptor.getValue());
   }
 
 
@@ -107,10 +120,9 @@ class UserServiceTest {
     Long userId = testUser.getId();
     when(principalService.getLoggedInUserId()).thenReturn(userId);
     when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-    when(userMapper.transformFromDbModel(testUser)).thenReturn(testRegisterRequestBody);
 
-    RegisterRequestBody result = userService.getLoggedInUserData();
+    UserData result = userService.getLoggedInUserData();
 
-    assertThat(result).isEqualTo(testRegisterRequestBody);
+    assertThat(result).isEqualTo(testUserData);
   }
 }

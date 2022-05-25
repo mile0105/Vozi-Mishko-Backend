@@ -1,8 +1,7 @@
 package com.vozimishko.backend.user;
 
 import com.vozimishko.backend.security.jwt.CustomJwtToken;
-import com.vozimishko.backend.user.model.LoginRequestBody;
-import com.vozimishko.backend.user.model.RegisterRequestBody;
+import com.vozimishko.backend.user.model.*;
 import com.vozimishko.backend.user.service.UserService;
 import com.vozimishko.backend.util.models.EmptyResponse;
 import lombok.RequiredArgsConstructor;
@@ -32,8 +31,14 @@ public class UserController {
   }
 
   @GetMapping("/me")
-  public ResponseEntity<RegisterRequestBody> getMyData() {
-    RegisterRequestBody loggedInUser = userService.getLoggedInUserData();
+  public ResponseEntity<UserData> getMyData() {
+    UserData loggedInUser = userService.getLoggedInUserData();
     return ResponseEntity.ok(loggedInUser);
+  }
+
+  @PutMapping("/me")
+  public ResponseEntity<User> updateMyData(@Valid @RequestBody UpdateUserRequestBody updateUserRequestBody) {
+    User updatedUser = userService.updateUser(updateUserRequestBody);
+    return ResponseEntity.ok(updatedUser);
   }
 }
