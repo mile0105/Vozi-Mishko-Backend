@@ -9,9 +9,11 @@ import com.vozimishko.backend.error.exceptions.UnauthorizedException;
 import com.vozimishko.backend.error.model.ErrorMessage;
 import com.vozimishko.backend.riderequest.service.RideRequestService;
 import com.vozimishko.backend.security.PrincipalService;
+import com.vozimishko.backend.security.profile.OnlyCompletedProfileAllowed;
 import com.vozimishko.backend.trip.model.Trip;
 import com.vozimishko.backend.trip.model.TripRequestBody;
 import com.vozimishko.backend.trip.repository.TripRepository;
+import com.vozimishko.backend.user.model.UserData;
 import com.vozimishko.backend.user.model.UserDetails;
 import com.vozimishko.backend.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,7 @@ public class TripService {
   private final UserService userService;
   private final RideRequestService rideRequestService;
 
+  @OnlyCompletedProfileAllowed
   public Trip addTrip(TripRequestBody tripRequestBody) {
     Long driverId = principalService.getLoggedInUserId();
 
@@ -62,10 +65,12 @@ public class TripService {
     return filterTripsByDateAndSort(trips, date);
   }
 
+  @OnlyCompletedProfileAllowed
   public Trip subscribeToTrip(Long tripId) {
     return subscribeToTrip(tripId, false);
   }
 
+  @OnlyCompletedProfileAllowed
   public Trip confirmRideRequest(Long tripId) {
     return subscribeToTrip(tripId, true);
   }

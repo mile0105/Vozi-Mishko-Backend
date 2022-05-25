@@ -38,8 +38,8 @@ public class UserService {
   private final PasswordEncoder passwordEncoder;
 
   public void register(RegisterRequestBody registerRequestBody) {
-    checkIfUserWithEmailExists(registerRequestBody.getEmail());
-    checkIfUserWithPhoneNumberExists(registerRequestBody.getPhoneNumber());
+    checkIfDifferentUserWithEmailExists(registerRequestBody.getEmail(), null);
+    checkIfDifferentUserWithPhoneNumberExists(registerRequestBody.getPhoneNumber(), null);
 
     User user = registerRequestBody.transformToDbModel(passwordEncoder);
     logger.info("Registering user with email: {}", registerRequestBody.getEmail());
@@ -89,17 +89,16 @@ public class UserService {
     Long loggedInUserId = principalService.getLoggedInUserId();
     User user = userRepository.findById(loggedInUserId).orElseThrow(() -> new InternalServerErrorException(ErrorMessage.SOMETHING_WENT_WRONG));
 
-
     User.UserBuilder updatedUserBuilder = user.toBuilder();
 
 
     if (StringUtils.isNotEmpty(updateUserRequestBody.getEmail())) {
-      checkIfUserWithEmailExists(updateUserRequestBody.getEmail());
+      checkIfDifferentUserWithEmailExists(updateUserRequestBody.getEmail(), loggedInUserId);
       updatedUserBuilder.email(updateUserRequestBody.getEmail());
     }
 
     if (StringUtils.isNotEmpty(updateUserRequestBody.getPhoneNumber())) {
-      checkIfUserWithPhoneNumberExists(updateUserRequestBody.getPhoneNumber());
+      checkIfDifferentUserWithPhoneNumberExists(updateUserRequestBody.getPhoneNumber(), loggedInUserId);
       updatedUserBuilder.phoneNumber(updateUserRequestBody.getPhoneNumber());
     }
 
@@ -108,28 +107,28 @@ public class UserService {
     }
 
     if (StringUtils.isNotEmpty(updateUserRequestBody.getLastName())) {
-      updatedUserBuilder.firstName(updateUserRequestBody.getLastName());
+      updatedUserBuilder.lastName(updateUserRequestBody.getLastName());
     }
 
     if (StringUtils.isNotEmpty(updateUserRequestBody.getPassword())) {
-      updatedUserBuilder.firstName(updateUserRequestBody.getLastName());
+      updatedUserBuilder.password(passwordEncoder.encode(updateUserRequestBody.getPassword()));
     }
 
     return userRepository.save(updatedUserBuilder.build());
   }
 
-  private void checkIfUserWithEmailExists(String email) {
+  private void checkIfDifferentUserWithEmailExists(String email, Long loggedInUserId) {
 
     Optional<User> existingUserByEmail = userRepository.findByEmail(email);
 
-    if (existingUserByEmail.isPresent()) {
+    if (existingUserByEmail.isPresent() && !existingUserByEmail.get().getId().equals(loggedInUserId)) {
       throw new BadRequestException(ErrorMessage.USER_EXISTS_EMAIL);
     }
   }
 
-  private void checkIfUserWithPhoneNumberExists(String phoneNumber) {
+  private void checkIfDifferentUserWithPhoneNumberExists(String phoneNumber, Long loggedInUserId) {
     Optional<User> existingUserByPhoneNumber = userRepository.findByPhoneNumber(phoneNumber);
-    if (existingUserByPhoneNumber.isPresent()) {
+    if (existingUserByPhoneNumber.isPresent() && !existingUserByPhoneNumber.get().getId().equals(loggedInUserId)) {
       throw new BadRequestException(ErrorMessage.USER_EXISTS_PHONE);
     }
   }

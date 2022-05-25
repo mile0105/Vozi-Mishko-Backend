@@ -8,6 +8,8 @@ import com.vozimishko.backend.riderequest.model.RideRequest;
 import com.vozimishko.backend.riderequest.model.RideRequestDto;
 import com.vozimishko.backend.riderequest.repository.RideRequestRepository;
 import com.vozimishko.backend.security.PrincipalService;
+import com.vozimishko.backend.user.model.UserData;
+import com.vozimishko.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +37,8 @@ class RideRequestServiceTest {
 
   @Mock
   private CityService cityService;
+  @Mock
+  private UserService userService;
 
   @Captor
   private ArgumentCaptor<RideRequest> rideRequestArgumentCaptor;

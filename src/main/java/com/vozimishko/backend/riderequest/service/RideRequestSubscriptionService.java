@@ -9,6 +9,7 @@ import com.vozimishko.backend.riderequest.model.RideRequest;
 import com.vozimishko.backend.riderequest.model.RideRequestSubscriptionDto;
 import com.vozimishko.backend.riderequest.repository.RideRequestRepository;
 import com.vozimishko.backend.security.PrincipalService;
+import com.vozimishko.backend.security.profile.OnlyCompletedProfileAllowed;
 import com.vozimishko.backend.trip.model.Trip;
 import com.vozimishko.backend.trip.service.TripService;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class RideRequestSubscriptionService {
   private final CarService carService;
   private final TripService tripService;
 
+  @OnlyCompletedProfileAllowed
   public void driverSubscribe(RideRequestSubscriptionDto rideRequestSubscriptionDto) {
 
     Long driverId = principalService.getLoggedInUserId();

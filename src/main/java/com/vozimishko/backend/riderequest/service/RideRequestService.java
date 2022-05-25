@@ -9,6 +9,7 @@ import com.vozimishko.backend.riderequest.model.RideRequest;
 import com.vozimishko.backend.riderequest.model.RideRequestDto;
 import com.vozimishko.backend.riderequest.repository.RideRequestRepository;
 import com.vozimishko.backend.security.PrincipalService;
+import com.vozimishko.backend.security.profile.OnlyCompletedProfileAllowed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,7 @@ public class RideRequestService {
   private final CityService cityService;
   private final RideRequestRepository rideRequestRepository;
 
+  @OnlyCompletedProfileAllowed
   public void addRideRequest(RideRequestDto rideRequestDto) {
 
     Long loggedInUserId = principalService.getLoggedInUserId();
@@ -37,6 +39,7 @@ public class RideRequestService {
     rideRequestRepository.save(rideRequest);
   }
 
+  @OnlyCompletedProfileAllowed
   public Set<RideRequest> getRideRequests(Long startCityId, Long endCityId, LocalDate dateOfDesiredTrip) {
 
     Set<RideRequest> rideRequests = null;
@@ -57,6 +60,7 @@ public class RideRequestService {
 
   }
 
+  @OnlyCompletedProfileAllowed
   public RideRequest findByIdOrThrow(Long rideRequestId) {
     return rideRequestRepository.findById(rideRequestId).orElseThrow(() -> new NotFoundException(ErrorMessage.RIDE_REQUEST_NOT_FOUND));
   }

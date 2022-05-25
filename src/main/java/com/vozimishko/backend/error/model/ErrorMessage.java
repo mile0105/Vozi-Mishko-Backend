@@ -31,6 +31,7 @@ public enum ErrorMessage {
   FREE_SPACES_EXCEED_CAR_CAPACITY("Free spaces exceed car capacity","Слободните места се повеќе од капацитетот на автомобилот" ,""),
   DOCUMENT_NOT_FOUND("The document is not found", "Документот не е пронајден",""),
   DOCUMENT_UNAVAILABLE("The document is not available", "Документот не е достапен", ""),
+  PROFILE_NOT_COMPLETE("Your profile is not complete","Вашиот профил не е комплетиран",""),
   EMPTY("","","");
 
   private final String englishVersion;
