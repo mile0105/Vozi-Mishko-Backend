@@ -1,5 +1,6 @@
 package com.vozimishko.backend.trip.model;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -42,5 +43,10 @@ public class Trip implements Comparable<Trip> {
   @Override
   public int compareTo(Trip other) {
     return other.getTimeOfDeparture().isAfter(timeOfDeparture)? 1: -1;
+  }
+
+  @JsonGetter(value = "canCarryDocuments")
+  public Boolean canCarryDocuments() {
+    return numberOfDocuments < maximumNumberOfDocuments;
   }
 }
