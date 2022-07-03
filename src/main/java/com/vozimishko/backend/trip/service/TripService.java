@@ -13,7 +13,6 @@ import com.vozimishko.backend.security.profile.OnlyCompletedProfileAllowed;
 import com.vozimishko.backend.trip.model.Trip;
 import com.vozimishko.backend.trip.model.TripRequestBody;
 import com.vozimishko.backend.trip.repository.TripRepository;
-import com.vozimishko.backend.user.model.UserData;
 import com.vozimishko.backend.user.model.UserDetails;
 import com.vozimishko.backend.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +62,11 @@ public class TripService {
     }
 
     return filterTripsByDateAndSort(trips, date);
+  }
+
+  public void updateTrip(Long tripId, Trip newTrip) {
+    findByIdOrThrow(tripId);
+    tripRepository.save(newTrip);
   }
 
   @OnlyCompletedProfileAllowed

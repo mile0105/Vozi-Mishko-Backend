@@ -80,8 +80,7 @@ class DocumentServiceTest {
 
   @Test
   void shouldAddDocumentToTrip() {
-    Trip trip = Trip.builder().id(tripId).maximumNumberOfDocuments(10).driverId(1L).build();
-    when(documentRepository.getNumberOfDocumentsInTrip(1L)).thenReturn(0L);
+    Trip trip = Trip.builder().id(tripId).numberOfDocuments(0).maximumNumberOfDocuments(10).driverId(1L).build();
     when(tripService.findByIdOrThrow(tripId)).thenReturn(trip);
     DocumentDto documentDto = DocumentDto.builder().tripId(tripId).build();
     Document transformedDocument = Document.builder().tripId(tripId).ownerId(1L).build();
@@ -91,12 +90,12 @@ class DocumentServiceTest {
     Document result = documentService.addDocument(documentDto);
 
     assertEquals(savedDocument, result);
+    verify(tripService).updateTrip(tripId, trip.toBuilder().numberOfDocuments(1).build());
   }
 
   @Test
   void shouldThrowExceptionWhenTripIsFull() {
-    Trip trip = Trip.builder().id(tripId).maximumNumberOfDocuments(10).driverId(1L).build();
-    when(documentRepository.getNumberOfDocumentsInTrip(1L)).thenReturn(10L);
+    Trip trip = Trip.builder().id(tripId).numberOfDocuments(10).maximumNumberOfDocuments(10).driverId(1L).build();
     when(tripService.findByIdOrThrow(tripId)).thenReturn(trip);
     DocumentDto documentDto = DocumentDto.builder().tripId(tripId).build();
 

@@ -16,8 +16,4 @@ public interface DocumentRepository extends CrudRepository<Document, Long> {
 
   @Query("select * from documents where owner_id = :userId")
   List<Document> getDocumentsFromUser(@Param("userId") Long userId);
-
-  @Query("select count(*) from documents where trip_id = :tripId")
-  Long getNumberOfDocumentsInTrip(@Param("tripId") Long tripId);
-
 }

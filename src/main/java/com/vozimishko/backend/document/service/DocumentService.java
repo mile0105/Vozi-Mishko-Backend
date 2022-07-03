@@ -7,6 +7,7 @@ import com.vozimishko.backend.error.exceptions.BadRequestException;
 import com.vozimishko.backend.error.exceptions.NotFoundException;
 import com.vozimishko.backend.error.model.ErrorMessage;
 import com.vozimishko.backend.security.PrincipalService;
+import com.vozimishko.backend.security.profile.OnlyCompletedProfileAllowed;
 import com.vozimishko.backend.trip.model.Trip;
 import com.vozimishko.backend.trip.service.TripService;
 import lombok.RequiredArgsConstructor;
@@ -36,16 +37,18 @@ public class DocumentService {
     return documentRepository.getDocumentsFromTrip(tripId);
   }
 
+  @OnlyCompletedProfileAllowed
   public Document addDocument(DocumentDto documentDto) {
     Long userId = principalService.getLoggedInUserId();
     Trip trip = tripService.findByIdOrThrow(documentDto.getTripId());
-    Long numberOfDocumentsInTrip = documentRepository.getNumberOfDocumentsInTrip(documentDto.getTripId());
+    Integer numberOfDocumentsInTrip = trip.getNumberOfDocuments();
 
     if (trip.getMaximumNumberOfDocuments() <= numberOfDocumentsInTrip + 1) {
       throw new BadRequestException(ErrorMessage.TRIP_IS_FULL);
     }
 
     Document document = documentDto.toDbDocument(userId);
+    tripService.updateTrip(documentDto.getTripId(), trip.toBuilder().numberOfDocuments(numberOfDocumentsInTrip + 1).build());
     return documentRepository.save(document);
   }
 
