@@ -84,7 +84,7 @@ public class UserService {
       .collect(Collectors.toList());
   }
 
-  public User updateUser(UpdateUserRequestBody updateUserRequestBody) {
+  public UserData updateUser(UpdateUserRequestBody updateUserRequestBody) {
 
     Long loggedInUserId = principalService.getLoggedInUserId();
     User user = userRepository.findById(loggedInUserId).orElseThrow(() -> new InternalServerErrorException(ErrorMessage.SOMETHING_WENT_WRONG));
@@ -114,7 +114,8 @@ public class UserService {
       updatedUserBuilder.password(passwordEncoder.encode(updateUserRequestBody.getPassword()));
     }
 
-    return userRepository.save(updatedUserBuilder.build());
+    User updatedUser = userRepository.save(updatedUserBuilder.build());
+    return updatedUser.toUserData();
   }
 
   private void checkIfDifferentUserWithEmailExists(String email, Long loggedInUserId) {
